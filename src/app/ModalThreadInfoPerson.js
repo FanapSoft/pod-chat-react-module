@@ -76,6 +76,7 @@ export default class ModalThreadInfo extends Component {
     this.onTabSelect = this.onTabSelect.bind(this);
     this.onEndReached = this.onEndReached.bind(this);
     this.setMessageTypesData = this.setMessageTypesData.bind(this);
+    this.onNotificationSelect = this.onNotificationSelect.bind(this);
     this.state = {
       endCondition: false,
       onEndReached: null,

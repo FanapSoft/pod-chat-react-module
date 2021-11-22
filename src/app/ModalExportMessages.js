@@ -2,7 +2,6 @@ import React, {Component} from "react";
 import {connect} from "react-redux";
 import {RangeDatePicker} from "jalali-react-datepicker/dist/index";
 
-
 //strings
 import strings from "../constants/localization";
 
@@ -18,6 +17,7 @@ import {Button, ButtonFloating} from "../../../pod-chat-ui-kit/src/button";
 import Container from "../../../pod-chat-ui-kit/src/container";
 import Gap from "../../../pod-chat-ui-kit/src/gap";
 import {MdDateRange} from "react-icons/md";
+import Loading, {LoadingBlinkDots} from "../../../pod-chat-ui-kit/src/loading";
 
 //styling
 import style from "../../styles/app/ModalExportMessages.scss";
@@ -34,10 +34,12 @@ class ModalShare extends Component {
   constructor(props) {
     super(props);
     this.pickerRef = React.createRef();
+    this.linkRef = React.createRef();
     this.openPicker = this.openPicker.bind(this);
     this.rangeSelected = this.rangeSelected.bind(this);
     this.state = {
-      rangeSelected: null
+      rangeSelected: null,
+      loading: false
     }
   }
 
@@ -70,21 +72,31 @@ class ModalShare extends Component {
 
   onExport() {
     const {rangeSelected} = this.state;
-    this.setState({
-      rangeSelected: null
-    });
+    const fromDateReadable = rangeSelected.start._d.toLocaleDateString('fa-US').replace(/\//g, "-");
+    const toDateReadable = rangeSelected.end._d.toLocaleDateString('fa-US').replace(/\//g, "-");
     const {dispatch, thread} = this.props;
+    this.setState({
+      loading: true
+    });
     dispatch(messageExport(thread.id, {
       fromTime: rangeSelected.start._d.getTime(),
       toTime: rangeSelected.end._d.getTime()
     })).then(e => {
-      console.log(e)
-    })
+      this.setState({
+        rangeSelected: null,
+        loading: false
+      });
+      const linkRef = this.linkRef.current;
+      linkRef.href = window.URL.createObjectURL(e.result);
+      linkRef.download =`talk-export-${fromDateReadable}-${toDateReadable}`;
+      linkRef.click();
+      window.URL.revokeObjectURL(e.result);
+    });
   }
 
   render() {
     const {threadExportMessagesShowing} = this.props;
-    const {rangeSelected} = this.state;
+    const {rangeSelected, loading} = this.state;
     return <Modal isOpen={threadExportMessagesShowing}>
 
       <ModalHeader>
@@ -99,6 +111,7 @@ class ModalShare extends Component {
                 <Text
                   bold>{strings.rangeSelectedFromDateToDate(rangeSelected.start._d.toLocaleDateString('fa'), rangeSelected.end._d.toLocaleDateString('fa'))}</Text>
               </Gap>
+              {loading && <Loading><LoadingBlinkDots size="sm"/></Loading>}
             </Container>
             <Button text onClick={this.onExport.bind(this)}>{strings.export}</Button>
             <Button text onClick={this.onCancel.bind(this)}>{strings.cancel}</Button>
@@ -118,10 +131,9 @@ class ModalShare extends Component {
             </Container>
             <Gap y={10}/>
             <Button text onClick={this.onClose.bind(this)}>{strings.close}</Button>
+            <a ref={this.linkRef} style={{display: "none"}} href=""/>
           </>
         }
-
-
       </ModalBody>
     </Modal>
   }

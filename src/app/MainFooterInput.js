@@ -145,9 +145,7 @@ export default class MainFooterInput extends Component {
     const isThreadHide = oldThreadShowing && !threadShowing;
     const storeDraftCondition = oldThreadId !== threadId || isThreadHide;
     if (msgEditing !== prevProps.messageEditing) {
-      if (this.state.messageText) {
-        this._setDraft(threadId, this.state.messageText);
-      }
+      this._setDraft(threadId, this.state.messageText);
       this.focus();
     }
     if (storeDraftCondition) {
@@ -346,7 +344,7 @@ export default class MainFooterInput extends Component {
         }
       }
     }
-    const finalText = `${text}${concatText}`;
+    const finalText = `${text || ""}${concatText}`;
     Cookies.set(threadId, finalText);
     this.lastTypingText = text;
   }

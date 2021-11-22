@@ -1,5 +1,6 @@
 // src/list/BoxScene.jss
 import React, {Component} from "react";
+import ReactDOM from "react-dom";
 import classnames from "classnames";
 import Strings from "../../constants/localization";
 import isElementVisible from "../../utils/dom";
@@ -30,8 +31,6 @@ import {
 //styling
 import style from "../../../styles/modules/EmojiIconsNav.scss";
 
-
-
 function haveFrequentlyUsed() {
   return !!Cookies.get(emojiCookieName);
 }
@@ -40,45 +39,37 @@ export default class EmojiIconsNav extends Component {
 
   constructor(props) {
     super(props);
+    this.scrollMoved = false;
     this.state = {
       currentActiveTab: "recent"
     }
   }
 
-  onNavClick(currentActiveTab) {
-    document.getElementById(currentActiveTab).scrollIntoView();
-  }
-
-  onScroll(e, target) {
-    const {currentActiveTab} = this.state;
+  handleNavScrollManipulations(scrollerRef) {
     const keys = Object.keys(Strings.emojiCatNames);
-    if (haveFrequentlyUsed()) {
-      keys.unshift("recent");
-    }
+    keys.unshift('recent');
     for (const key of keys) {
-      if (isElementVisible(document.getElementById(key))) {
-        if (currentActiveTab === key) {
-          break;
+      isElementVisible(document.getElementById(key), e => {
+        if (!this.scrollMoved) {
+          return;
         }
         this.setState({
           currentActiveTab: key
         });
-      }
+      }, {root: ReactDOM.findDOMNode(scrollerRef.current)}, key === "recent" ? () => {
+        this.setState({
+          currentActiveTab: 'people'
+        });
+      } : null)
     }
-    if (haveFrequentlyUsed()) {
-      setTimeout(() => {
-        if (target) {
-          if (target.scrollTop <= 0) {
-            const {currentActiveTab} = this.state;
-            if (currentActiveTab !== keys[0]) {
-              this.setState({
-                currentActiveTab: keys[0]
-              });
-            }
-          }
-        }
-      }, 30);
-    }
+  }
+
+  onScroll(e, target) {
+    this.scrollMoved = true;
+  }
+
+  onNavClick(currentActiveTab) {
+    document.getElementById(currentActiveTab).scrollIntoView();
   }
 
   render() {
@@ -111,7 +102,7 @@ export default class EmojiIconsNav extends Component {
                        onClick={this.onNavClick.bind(this, correctEmojiCat.nav)}>
               {correctEmojiCat.icon}
               {correctEmojiCat.nav === currentActiveTab &&
-              <Container className={style.MainFooterEmojiIconsNav__ActiveItem}/>}
+              <Container className={style.EmojiIconsNav__ActiveItem}/>}
             </Container>
           ))
         }

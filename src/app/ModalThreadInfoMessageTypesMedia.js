@@ -4,7 +4,7 @@ import {
   getMessageMetaData,
   humanFileSize
 } from "../utils/helpers";
-import {getFile, getFileDownloading, updateLink} from "../utils/hashmap";
+import {cancelDownload, getFile, getFileDownloading, updateLink} from "../utils/hashmap";
 
 import Text from "../../../pod-chat-ui-kit/src/typography/Text";
 import Container from "../../../pod-chat-ui-kit/src/container";
@@ -48,7 +48,7 @@ function onPlayClick(fileHash, dispatch, setDownloading, idMessage, idMessageTri
   const fileStatusResult = fileStatus(fileHash);
   if (lastFileRequest.downloadFunction) {
     lastFileRequest.downloadFunction(false);
-    //cancelFileDownloadingFromHashMapWindow(lastFileRequest.fileHash, dispatch);
+    cancelDownload(lastFileRequest.fileHash, dispatch)
   }
   lastFileRequest.downloadFunction = setDownloading;
   lastFileRequest.id = idMessage;
@@ -77,24 +77,11 @@ function onPlayClick(fileHash, dispatch, setDownloading, idMessage, idMessageTri
           pastAction();
         }, 100)
       }
-    }, dispatch, true, true, {responseType: "link"})
+    }, dispatch, true, true)
   } else {
     //TODO: fix it when on new token coming
     if (fileStatusResult !== "DOWNLOADING") {
-      updateLink(fileHash, dispatch, true).then(link => {
-        if (downloadable) {
-          const elem = document.getElementById(idMessageTrigger);
-          if (elem) {
-            elem.href = link;
-          }
-        } else {
-          const elem = document.getElementById(idMessage);
-          if (elem) {
-            elem.src = link
-          }
-        }
-        pastAction();
-      })
+      pastAction();
     }
   }
 }
@@ -149,7 +136,7 @@ export default function ({dispatch, message, type}) {
         }
 
         {
-          downloading ?
+          fileResult === "DOWNLOADING" || downloading ?
             <Loading><LoadingBlinkDots size="sm"/></Loading>
             :
             <Shape color="accent"

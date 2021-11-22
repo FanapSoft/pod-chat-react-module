@@ -115,6 +115,7 @@ export default class EmojiIcons extends Component {
   constructor(props) {
     super(props);
     this.onScroll = this.onScroll.bind(this);
+    this.scrollerRef = React.createRef();
     if (!Cookies.get(emojiCookieName)) {
       Cookies.set(emojiCookieName,JSON.stringify(["1|😄", "1|😅", "1|😓", "1|😡", "1|😬", "1|😐", "1|😮", "1|😷", "1|🙏", "1|👆", "1|👉", "1|👈", "1|👍", "1|👎", "1|👏", "1|☝", "1|🚌", "1|✅", "1|❎"]), {expires: 99999999});
     }
@@ -128,6 +129,14 @@ export default class EmojiIcons extends Component {
     if (!mobileCheck()) {
       setTimeout(focusInputNode, 20);
     }
+  }
+
+  componentDidMount() {
+    this.navRef.handleNavScrollManipulations(this.scrollerRef);
+  }
+
+  onScroll(e, target) {
+    this.navRef.onScroll(e, target)
   }
 
   calculations() {
@@ -164,7 +173,7 @@ export default class EmojiIcons extends Component {
       }
       emojiArray.push({
         id: inFrequently ? "recent" : Object.keys(Strings.emojiCatNames)[cat],
-        title: inFrequently ? null : emojiCatName[cat],
+        title: inFrequently ? Strings.recent : emojiCatName[cat],
         emojiCatArray
       });
       cat++;
@@ -173,9 +182,6 @@ export default class EmojiIcons extends Component {
     return emojiArray;
   }
 
-  onScroll(e, target) {
-    this.navRef.onScroll(e, target)
-  }
 
   render() {
     const emojiCats = this.calculations();
@@ -186,15 +192,15 @@ export default class EmojiIcons extends Component {
     return (
       <Container className={style.EmojiIcons}>
         <EmojiIconsNav ref={e => this.navRef = e}/>
-        <Scroller onScroll={this.onScroll} className={style.EmojiIcons__IconsContainer}>
+        <Scroller onScroll={this.onScroll} className={style.EmojiIcons__IconsContainer} ref={this.scrollerRef}>
 
           {emojiCats.map(emojiCat => (
-            <Container id={emojiCat.id}>
+            <Container >
 
               {
                 emojiCat.title ?
-                  <Gap y={15} x={10}>
-                    <Container>
+                  <Gap y={15} x={10} >
+                    <Container id={emojiCat.id}>
                       <Text bold>{emojiCat.title}</Text>
                     </Container>
                   </Gap> :

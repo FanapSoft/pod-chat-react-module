@@ -1,6 +1,7 @@
 import React, {useRef} from "react";
 import {chatAudioPlayer as chatAudioPlayerAction} from "../actions/chatActions";
 import WaveSurfer from "wavesurfer.js";
+import style from "../../styles/utils/ghost.scss";
 
 export default function ({message, thread, setPlayTrigger, setPlayAfterDownloadTrigger, setJustMountedTrigger, chatAudioPlayer, dispatch}) {
   let soundPlayer = null;

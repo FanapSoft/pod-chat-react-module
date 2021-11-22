@@ -177,7 +177,7 @@ export const chatSetInstance = config => {
       onMessageEvents: (message, type) => {
         const {thread} = getState().thread;
 
-        if (type === "MESSAGE_NEW") {
+        if (window.document.hasFocus() && type === "MESSAGE_NEW") {
           if (thread) {
             if (thread.id !== message.threadId) {
               return;
@@ -193,7 +193,6 @@ export const chatSetInstance = config => {
       onCallEvents: (call, type) => {
         const oldCall = getState().chatCallStatus;
         const user = getState().user.user;
-        console.log(type)
         switch (type) {
           case "CALL_SESSION_CREATED":
             call.isOwner = true;

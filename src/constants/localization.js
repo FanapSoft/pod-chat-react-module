@@ -234,6 +234,7 @@ let strings = new LocalizedStrings({
       return `${count} فایل برای ارسال داریم اگر نظری دارید، در ادامه بنویسید`
     },
     comment: "نظر",
+    recent: "اخیرا",
     emojiCatNames: {
       people: "مردم",
       nature: "طبیعت",

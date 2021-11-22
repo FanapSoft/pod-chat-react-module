@@ -1,10 +1,12 @@
-export default function isElementVisible(el, callBack) {
+export default function isElementVisible(el, callBack, options, outCallback) {
   if (IntersectionObserver) {
     const observer = new IntersectionObserver(function (entries) {
       if (entries[0].isIntersecting === true) {
         return callBack();
+      } else {
+        outCallback && outCallback()
       }
-    }, {threshold: [1]});
+    }, {threshold: [1], ...options});
     return observer.observe(el);
   }
 

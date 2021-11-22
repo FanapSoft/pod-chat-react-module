@@ -58,14 +58,15 @@ export default class LeftAsideMain extends Component {
   }
 
   getMessageSeenList(messageId) {
-    const {dispatch} = this.props;
+    const {dispatch, user} = this.props;
     this.setState({
       seenList: null,
       seeListLoading: true
     });
     dispatch(messageGetSeenList(messageId)).then(result => {
+      console.log(result.filter(e=>e.id !== user.user.id), user, result)
       this.setState({
-        seenList: result,
+        seenList: result ? result.filter(e=>e.id !== user.user.id) : [],
         seeListLoading: false
       })
     });
@@ -89,7 +90,7 @@ export default class LeftAsideMain extends Component {
     return (
       <Container relative>
         {
-          seenList && seenList.length > 1 ?
+          seenList ?
             <ContactList height={"calc(100vh - 89px)"}
                          contacts={seenList}
                          avatarSize={avatarUrlGenerator.SIZES.SMALL}
