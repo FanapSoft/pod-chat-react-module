@@ -144,7 +144,7 @@ export default class MainFooterInput extends Component {
     const {id: oldThreadId} = prevProps.thread;
     const isThreadHide = oldThreadShowing && !threadShowing;
     const storeDraftCondition = oldThreadId !== threadId || isThreadHide;
-    if (msgEditing !== prevProps.messageEditing) {
+    if ((msgEditing !== prevProps.messageEditing) && (prevProps.thread.id === threadId)) {
       this._setDraft(threadId, this.state.messageText);
       this.focus();
     }
@@ -281,6 +281,7 @@ export default class MainFooterInput extends Component {
           } else {
             dispatch(messageForward(threadId, msgEditingId));
           }
+
         }
         this.forwardMessageSent = true;
       } else {
@@ -337,6 +338,7 @@ export default class MainFooterInput extends Component {
   _setDraft(threadId, text) {
     const {messageEditing, thread} = this.props;
     let concatText = "";
+    console.log(messageEditing, thread.id);
     if (messageEditing) {
       if (messageEditing.type !== constants.forwarding) {
         if (messageEditing.message.threadId === thread.id) {

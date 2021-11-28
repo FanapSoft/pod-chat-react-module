@@ -211,7 +211,7 @@ export default class EmojiIcons extends Component {
               <Container className={style.EmojiIcons__Icons} relative>
 
                 {emojiCat.emojiCatArray.map(emoji => (
-                  <Container key={emoji.emoji} className={style.EmojiIcons__Icon}
+                  <Container key={emoji.name} className={style.EmojiIcons__Icon}
                              onClick={this.onEmojiClick.bind(this, emoji, emoji.cat)}>
                     <Container
                       className={`${emoji.className} ${classNames}`}

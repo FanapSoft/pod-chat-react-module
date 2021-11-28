@@ -90,7 +90,7 @@ export default class LeftAsideMain extends Component {
     return (
       <Container relative>
         {
-          seenList ?
+          seenList?.length ?
             <ContactList height={"calc(100vh - 89px)"}
                          contacts={seenList}
                          avatarSize={avatarUrlGenerator.SIZES.SMALL}
