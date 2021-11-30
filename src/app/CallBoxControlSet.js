@@ -24,14 +24,14 @@ import {
   MdMic,
   MdVideocam,
   MdMoreHoriz,
-  MdViewQuilt,
+  MdOutlineScreenShare,
   MdViewCarousel,
   MdPause
 } from "react-icons/md";
 
 //styling
 import style from "../../styles/app/CallBoxControlSet.scss";
-import {getMessageMetaData, isVideoCall, mobileCheck} from "../utils/helpers";
+import {getMessageMetaData, isScreenShare, isScreenShareOwnerIsMe, isVideoCall, mobileCheck} from "../utils/helpers";
 import {
   CALL_DIV_ID, CHAT_CALL_BOX_COMPACTED, CHAT_CALL_BOX_FULL_SCREEN,
   CHAT_CALL_BOX_NORMAL,
@@ -174,10 +174,11 @@ export default class CallBoxControlSet extends Component {
   }
 
   render() {
-    const {chatCallStatus, buttonSize, chatCallBoxShowing} = this.props;
+    const {chatCallStatus, buttonSize, chatCallBoxShowing, user} = this.props;
     const {mic, volume, moreSettingShow} = this.state;
     const {status, call} = chatCallStatus;
     const {showing: callBoxShowingType} = chatCallBoxShowing;
+    const showScreenShareIconCondition = isScreenShare(call) && isScreenShareOwnerIsMe(call?.screenShare, user);
     const incomingCondition = status === CHAT_CALL_STATUS_INCOMING;
     const fullScreenCondition = callBoxShowingType === CHAT_CALL_BOX_FULL_SCREEN || (mobileCheck() && callBoxShowingType !== CHAT_CALL_BOX_COMPACTED);
     const classNames = classnames({
@@ -239,8 +240,14 @@ export default class CallBoxControlSet extends Component {
 
       {!incomingCondition && callBoxShowingType !== CHAT_CALL_BOX_COMPACTED &&
       <Fragment>
+
         <ButtonFloating onClick={this.onMoreActionClick.bind(this, true)} size={buttonSize || "sm"}
                         className={moreActionClassNames}>
+          {showScreenShareIconCondition &&
+          <Container className={style.CallBoxControlSet__ScreenShareIconContainer}>
+            <MdOutlineScreenShare size={style.iconSizeMd} style={{margin: "7px 5px"}}/>
+          </Container>
+          }
           <MdMoreHoriz size={style.iconSizeMd} style={{margin: "7px 5px"}}/>
 
         </ButtonFloating>

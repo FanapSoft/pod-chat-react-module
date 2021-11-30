@@ -1069,4 +1069,26 @@ export default class ChatSDK {
       resolve(result)
     });
   }
+
+  @promiseDecorator
+  startScreenShare(resolve, reject, callId, options = {}) {
+    const params = {
+      callId,
+      ...options
+    };
+    this.chatAgent.startScreenShare(params, function (result) {
+      resolve(result)
+    });
+  }
+
+  @promiseDecorator
+  endScreenShare(resolve, reject, callId, options = {}) {
+    const params = {
+      callId,
+      ...options
+    };
+    this.chatAgent.endScreenShare(params, function (result) {
+      resolve(result)
+    });
+  }
 };

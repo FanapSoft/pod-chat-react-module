@@ -317,7 +317,8 @@ let strings = new LocalizedStrings({
     export: "استخراج",
     threadParticipantList: "لیست اعضا گروه",
     ok: "باشه",
-    youSuccessfullyShowCallButtons: "شما دکمه های تماس رو فعال کردی!!!"
+    youSuccessfullyShowCallButtons: "شما دکمه های تماس رو فعال کردی!!!",
+    shareScreen: "اشتراک صفحه نمایش"
   },
   it: {}
 });

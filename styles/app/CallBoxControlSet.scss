@@ -24,6 +24,17 @@
   background-color: $color-green-dark;
 }
 
-.CallBoxControlSet__Speaker,
-.CallBoxControlSet__Mic {
+.CallBoxControlSet__ScreenShareIconContainer {
+  position: absolute;
+  top: -12px;
+  left: -4px;
+  z-index: 1;
+  background-color: $color-white;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  border-radius: 26px;
+  border: 2px solid $color-accent;
+  color: $color-accent;
 }

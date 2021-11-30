@@ -18,8 +18,14 @@ import {
 
 //styling
 import style from "../../styles/app/CallBoxSceneVideo.scss";
-import {mobileCheck} from "../utils/helpers";
-
+import {
+  findLocalStreams,
+  findRemoteStreams,
+  isScreenShare,
+  isScreenShareOwnerIsMe, isVideoCall,
+  mobileCheck
+} from "../utils/helpers";
+import {get} from "leaflet/src/dom/DomUtil";
 
 
 @connect()
@@ -31,24 +37,60 @@ export default class CallBoxScenePersonVideo extends Component {
     this.localVideoRef = React.createRef();
   }
 
+  _getTags(call, user) {
+    const {uiElements} = call;
+    const isVideoCalling = isVideoCall(call);
+    const isScreenSharing = isScreenShare(call);
+    const isScreenSharingOwnerIsMe = isScreenSharing && isScreenShareOwnerIsMe(call?.screenShare, user);
+    const getRemoteVideoCamCondition = (isVideoCalling && isScreenSharing && isScreenSharingOwnerIsMe) || (!isScreenSharing && isVideoCalling);
+    const getLocalVideoCamCondition = (isVideoCalling && isScreenSharing && !isScreenSharingOwnerIsMe) || (!isScreenSharing && isVideoCalling);
+    const {video: remoteVideo} = getRemoteVideoCamCondition ?
+      findRemoteStreams(user, call.otherClientDtoList, uiElements)
+      :
+      isScreenSharing ? uiElements.screenShare : {};
+    const {video: localVideo} = getLocalVideoCamCondition ?
+      findLocalStreams(user, uiElements)
+      :
+      isScreenSharing && !isVideoCalling ? {} : uiElements.screenShare;
+
+    return {remoteVideo, localVideo, isScreenSharing, isScreenSharingOwnerIsMe, isVideoCalling}
+  }
+
   _injectVideos() {
-    const {call} = this.props.chatCallStatus;
-    if (call.uiRemoteElements) {
+    const {user, chatCallStatus} = this.props;
+    const {call} = chatCallStatus;
+    const {uiElements} = call;
+    if (uiElements) {
       const remoteVideoTag = ReactDOM.findDOMNode(this.remoteVideoRef.current);
       const localVideoTag = ReactDOM.findDOMNode(this.localVideoRef.current);
-      const uiRemoteElements = call.uiRemoteElements[0];
-      const {uiRemoteAudio, uiRemoteVideo} = uiRemoteElements;
-      const {uiLocalVideo} = call;
-      uiRemoteVideo.setAttribute("class", style.CallBoxSceneVideo__SideCamVideo);
-      uiRemoteVideo.removeAttribute("height");
-      uiRemoteVideo.removeAttribute("width");
-      uiLocalVideo.setAttribute("class", style.CallBoxSceneVideo__MyCamVideo);
-      uiLocalVideo.removeAttribute("height");
-      uiLocalVideo.removeAttribute("width");
-      uiLocalVideo.disablePictureInPicture = true;
-      uiRemoteVideo.disablePictureInPicture = true;
-      remoteVideoTag.append(uiRemoteVideo);
-      localVideoTag.append(uiLocalVideo);
+      const {remoteVideo, localVideo, isScreenSharing, isScreenSharingOwnerIsMe, isVideoCalling} = this._getTags(call, user);
+
+      if (remoteVideo) {
+        remoteVideo.setAttribute("class", style.CallBoxSceneVideo__SideCamVideo);
+        remoteVideo.removeAttribute("height");
+        remoteVideo.removeAttribute("width");
+        remoteVideo.disablePictureInPicture = true;
+      }
+      if (localVideo) {
+        localVideo.setAttribute("class", style.CallBoxSceneVideo__MyCamVideo);
+        localVideo.removeAttribute("height");
+        localVideo.removeAttribute("width");
+        localVideo.disablePictureInPicture = true;
+      }
+      setTimeout(function () {
+        remoteVideo && remoteVideoTag.append(remoteVideo);
+        localVideo && localVideoTag.append(localVideo);
+        if (isScreenSharing && isVideoCalling) {
+          const callDivTag = document.getElementById(CALL_DIV_ID);
+          if (isScreenSharingOwnerIsMe) {
+            const {video} = findLocalStreams(user, uiElements);
+            callDivTag.append(video);
+          } else {
+            const {video} = findRemoteStreams(user, call.otherClientDtoList, uiElements);
+            callDivTag.append(video);
+          }
+        }
+      }, 100);
     }
   }
 
@@ -57,13 +99,15 @@ export default class CallBoxScenePersonVideo extends Component {
   }
 
   componentWillUnmount() {
-    const {call} = this.props.chatCallStatus;
-    if (call.uiRemoteElements) {
-      const uiRemoteElements = call.uiRemoteElements[0];
-      const {uiRemoteVideo} = uiRemoteElements;
+    const {user, chatCallStatus} = this.props;
+    const {call} = chatCallStatus;
+    const {uiElements} = call;
+    if (uiElements) {
+      const {video: remoteVideo} = isScreenShare(call) ? uiElements.screenShare : findRemoteStreams(user, call.otherClientDtoList, uiElements);
+      const {video: localVideo} = findLocalStreams(user, uiElements);
       const callDivTag = document.getElementById(CALL_DIV_ID);
-      callDivTag.append(uiRemoteVideo);
-      callDivTag.append(call.uiLocalVideo);
+      callDivTag.append(remoteVideo);
+      callDivTag.append(localVideo);
     }
   }
 
@@ -90,7 +134,8 @@ export default class CallBoxScenePersonVideo extends Component {
 
     const callBoxSceneCamContainerClassName = classnames({
       [style.CallBoxSceneVideoCamContainer]: true,
-      [style["CallBoxSceneVideoCamContainer--fullScreen"]]: fullScreenCondition
+      [style["CallBoxSceneVideoCamContainer--fullScreen"]]: fullScreenCondition,
+      [style["CallBoxSceneVideoCamContainer--fullWidth"]]: fullScreenCondition && (isScreenShare(call) && !isScreenShareOwnerIsMe(call?.screenShare, user)),
     });
 
     return <Container className={classNames}>

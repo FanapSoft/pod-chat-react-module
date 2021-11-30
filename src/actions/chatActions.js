@@ -97,7 +97,7 @@ function resetChatCall(dispatch, call) {
       const {uiLocalVideo, uiLocalAudio} = call;
       uiLocalVideo.remove();
       uiLocalAudio.remove();
-      for(const remoteTag of call?.uiRemoteElements) {
+      for (const remoteTag of call?.uiRemoteElements) {
         remoteTag.uiRemoteAudio.remove();
         remoteTag.uiRemoteVideo.remove();
       }
@@ -238,6 +238,11 @@ export const chatSetInstance = config => {
             return;
           case "CALL_DIVS":
             return dispatch(chatCallStatus(CHAT_CALL_STATUS_STARTED, {...oldCall.call, ...call}));
+          case "START_SCREEN_SHARE":
+            return dispatch(chatCallStatus(CHAT_CALL_STATUS_STARTED, {...oldCall.call, screenShare: {...call}}));
+          case "END_SCREEN_SHARE":
+            delete oldCall.call.screenShare;
+            return dispatch(chatCallStatus(CHAT_CALL_STATUS_STARTED, {...oldCall.call}));
           default:
             break;
         }
@@ -627,6 +632,27 @@ export const chatStartGroupCall = (threadId, invitees, type, params) => {
     dispatch(chatCallStatus(CHAT_CALL_STATUS_OUTGOING, {type: type === "video" ? 1 : 0}));
   }
 };
+
+export const chatCallStartScreenShare = () => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const chatSDK = state.chatInstance.chatSDK;
+    if (state.chatCallStatus.call) {
+      chatSDK.startScreenShare(state.chatCallStatus.call.callId);
+    }
+  }
+};
+
+export const chatCallEndScreenShare = () => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const chatSDK = state.chatInstance.chatSDK;
+    if (state.chatCallStatus.call) {
+      chatSDK.endScreenShare(state.chatCallStatus.call.callId);
+    }
+  }
+};
+
 
 export const chatCallGroupVideoViewMode = type => {
   return (dispatch, getState) => {

@@ -24,6 +24,10 @@
   overflow: hidden;
 }
 
+.CallBoxSceneVideoCamContainer--fullWidth {
+  max-width: none;
+}
+
 .CallBoxSceneVideo__SideCam {
   height: 100%;
   display: flex;

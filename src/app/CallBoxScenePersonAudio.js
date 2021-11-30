@@ -13,7 +13,7 @@ import Avatar, {AvatarImage, AvatarName} from "../../../pod-chat-ui-kit/src/avat
 
 //styling
 import style from "../../styles/app/CallBoxSceneAudio.scss";
-import {avatarNameGenerator, avatarUrlGenerator, mobileCheck} from "../utils/helpers";
+import {avatarNameGenerator, avatarUrlGenerator, isScreenShareOwnerIsMe, mobileCheck} from "../utils/helpers";
 import {
   CHAT_CALL_BOX_FULL_SCREEN,
   CHAT_CALL_STATUS_INCOMING

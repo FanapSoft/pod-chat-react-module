@@ -5,11 +5,8 @@ import Cookies from "js-cookie";
 //actions
 import {threadCreateWithExistThread, threadGoToMessageId} from "../actions/threadActions";
 import {
-  chatAcceptCall,
-  chatAudioPlayer,
-  chatCallBoxShowing, chatCallMuteParticipants,
-  chatCallStatus, chatCallUnMuteParticipants,
-  chatRejectCall
+  chatCallEndScreenShare,
+  chatCallStartScreenShare
 } from "../actions/chatActions";
 
 //components
@@ -20,7 +17,7 @@ import List, {ListItem} from "../../../pod-chat-ui-kit/src/list";
 import Gap from "../../../pod-chat-ui-kit/src/gap";
 import Modal, {ModalBody, ModalHeader, ModalFooter} from "../../../pod-chat-ui-kit/src/modal";
 import {
-  MdCall,
+  MdOutlineScreenShare,
   MdMicOff,
   MdRingVolume,
   MdVolumeUp,
@@ -35,7 +32,14 @@ import {
 
 //styling
 import style from "../../styles/app/CallBoxControlSetMore.scss";
-import {getMessageMetaData, isVideoCall, mobileCheck} from "../utils/helpers";
+import {
+  getMessageMetaData,
+  isGroup,
+  isScreenShare,
+  isScreenShareOwnerIsMe,
+  isVideoCall,
+  mobileCheck
+} from "../utils/helpers";
 import {
   CALL_DIV_ID, CALL_SETTING_COOKIE_KEY_NAME,
   CHAT_CALL_BOX_NORMAL,
@@ -63,6 +67,7 @@ export default class CallBoxControlSetMore extends Component {
     this.ringToneConfigClick = this.ringToneConfigClick.bind(this);
     this.onCallToneClick = this.onCallToneClick.bind(this);
     this.onViewModeClick = this.onViewModeClick.bind(this);
+    this.shareScreenClick = this.shareScreenClick.bind(this);
     this.onClose = this.onClose.bind(this);
     const currentSettings = JSON.parse(Cookies.get(CALL_SETTING_COOKIE_KEY_NAME) || "{}");
     this.state = {
@@ -111,24 +116,32 @@ export default class CallBoxControlSetMore extends Component {
     this.setSetting("groupVideoCallMode", this.state["groupVideoCallMode"] === GROUP_VIDEO_CALL_VIEW_MODE.GRID_VIEW ? GROUP_VIDEO_CALL_VIEW_MODE.THUMBNAIL_VIEW : GROUP_VIDEO_CALL_VIEW_MODE.GRID_VIEW);
   }
 
+  shareScreenClick(isSharing) {
+    const {dispatch} = this.props;
+    dispatch(isSharing ? chatCallEndScreenShare() : chatCallStartScreenShare());
+    this.onClose();
+  }
+
   onClose(e) {
     const {onMoreActionClick} = this.props;
     onMoreActionClick(false);
   }
 
   render() {
-    const {chatCallStatus, buttonSize} = this.props;
+    const {chatCallStatus, user} = this.props;
     const {ringToneSound, callToneSound, groupVideoCallMode} = this.state;
     const {status, call} = chatCallStatus;
-    const incomingCondition = status === CHAT_CALL_STATUS_INCOMING;
+    const isScreenSharing = isScreenShare(call) && isScreenShareOwnerIsMe(call.screenShare, user);
     const settingItemClassNames = classnames({
       [style.CallBoxControlSetMore__SettingItemContainer]: true
     });
+    const grayLikeScreenShareText = status !== CHAT_CALL_STATUS_STARTED;
 
-    return <Modal isOpen={true} wrapContent userSelect="none" onClose={this.onClose} onClick={e=>e.stopPropagation()}>
+    return <Modal isOpen={true} wrapContent userSelect="none" onClose={this.onClose} onClick={e => e.stopPropagation()}>
 
       <ModalBody>
         <List>
+          {call.conversationVO && isGroup(call.conversationVO) &&
           <ListItem selection invert onSelect={this.onViewModeClick}>
 
             <Container className={settingItemClassNames}>
@@ -147,6 +160,28 @@ export default class CallBoxControlSetMore extends Component {
                   <MdViewQuilt size={style.iconSizeMd} color={style.colorGrayDark}/>
                 }
 
+              </Container>
+
+            </Container>
+          </ListItem>
+          }
+
+
+
+          <ListItem selection invert onSelect={!grayLikeScreenShareText && this.shareScreenClick.bind(this, isScreenSharing)}>
+
+            <Container className={settingItemClassNames}>
+
+              <Container className={style.CallBoxControlSetMore__SettingItemText}>
+                <MdOutlineScreenShare size={style.iconSizeMd} color={style.colorGrayDark}/>
+                <Gap x={20}>
+                  <Text color={grayLikeScreenShareText && "gray"}>{strings.shareScreen}</Text>
+                </Gap>
+              </Container>
+
+              <Container className={style.CallBoxControlSetMore__SettingItemStatus}>
+                <Text size="sm"
+                      color={isScreenSharing ? "green" : "red"}>{isScreenSharing ? strings.active : strings.inActive}</Text>
               </Container>
 
             </Container>

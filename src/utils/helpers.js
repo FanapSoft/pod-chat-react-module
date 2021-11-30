@@ -799,6 +799,37 @@ export function isVideoCall(call) {
   }
 }
 
+export function isScreenShare(call) {
+  if (call) {
+    if (call.screenShare) {
+      return true
+    }
+  }
+}
+
+export function isScreenShareOwnerIsMe(screenShare, user) {
+  if (screenShare) {
+    if (screenShare.screenOwner.id === user.id) {
+      return true;
+    }
+  }
+}
+
+export function findLocalStreams(user, callDivs) {
+  if (user) {
+    if (callDivs) {
+      return callDivs[user.id];
+    }
+  }
+}
+
+export function findRemoteStreams(user, participants, callDivs) {
+  const filteredParticipants = participants.filter(participant => participant.userId !== user.id);
+  if (filteredParticipants) {
+    return callDivs[filteredParticipants[0].userId];
+  }
+}
+
 export function analyzeCallStatus(message, thread) {
   const isMessageByMeBool = isMessageByMe(message);
   const {
