@@ -815,6 +815,22 @@ export function isScreenShareOwnerIsMe(screenShare, user) {
   }
 }
 
+export function isRecording(call) {
+  if (call) {
+    if (call.recording) {
+      return true
+    }
+  }
+}
+
+export function isRecordingOwnerIsMe(recording, user) {
+  if (recording) {
+    if (recording.id === user.id) {
+      return true;
+    }
+  }
+}
+
 export function findLocalStreams(user, callDivs) {
   if (user) {
     if (callDivs) {

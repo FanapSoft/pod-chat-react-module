@@ -243,6 +243,11 @@ export const chatSetInstance = config => {
           case "END_SCREEN_SHARE":
             delete oldCall.call.screenShare;
             return dispatch(chatCallStatus(CHAT_CALL_STATUS_STARTED, {...oldCall.call}));
+          case "START_RECORDING_CALL":
+            return dispatch(chatCallStatus(CHAT_CALL_STATUS_STARTED, {...oldCall.call, recording: {...call}}));
+          case "STOP_RECORDING_CALL":
+            delete oldCall.call.recording;
+            return dispatch(chatCallStatus(CHAT_CALL_STATUS_STARTED, {...oldCall.call}));
           default:
             break;
         }
@@ -652,6 +657,27 @@ export const chatCallEndScreenShare = () => {
     }
   }
 };
+
+export const chatStartCallRecording = () => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const chatSDK = state.chatInstance.chatSDK;
+    if (state.chatCallStatus.call) {
+      chatSDK.startRecordingCall(state.chatCallStatus.call.callId);
+    }
+  }
+};
+
+export const chatStopCallRecording = () => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const chatSDK = state.chatInstance.chatSDK;
+    if (state.chatCallStatus.call) {
+      chatSDK.stopRecordingCall(state.chatCallStatus.call.callId);
+    }
+  }
+};
+
 
 
 export const chatCallGroupVideoViewMode = type => {

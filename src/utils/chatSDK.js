@@ -1091,4 +1091,26 @@ export default class ChatSDK {
       resolve(result)
     });
   }
+
+  @promiseDecorator
+  startRecordingCall(resolve, reject, callId, options = {}) {
+    const params = {
+      callId,
+      ...options
+    };
+    this.chatAgent.startRecordingCall(params, function (result) {
+      resolve(result)
+    });
+  }
+
+  @promiseDecorator
+  stopRecordingCall(resolve, reject, callId, options = {}) {
+    const params = {
+      callId,
+      ...options
+    };
+    this.chatAgent.stopRecordingCall(params, function (result) {
+      resolve(result)
+    });
+  }
 };

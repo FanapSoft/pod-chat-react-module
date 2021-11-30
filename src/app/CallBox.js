@@ -18,10 +18,11 @@ import {
 } from "react-icons/md";
 import CallBoxScenePerson from "./CallBoxScenePerson";
 import CallBoxControlSet from "./CallBoxControlSet";
+import CallBoxRecording from "./CallBoxRecording";
 
 //styling
 import style from "../../styles/app/CallBox.scss";
-import {getMessageMetaData, isGroup, mobileCheck} from "../utils/helpers";
+import {getMessageMetaData, isGroup, isRecording, mobileCheck} from "../utils/helpers";
 import {
   CALL_SETTING_COOKIE_KEY_NAME,
   CALL_SETTINGS_CHANGE_EVENT,
@@ -113,9 +114,7 @@ export default class CallBox extends Component {
   }
 
   componentWillUnmount() {
-    this.setState({
-
-    })
+    this.setState({})
   }
 
   onCallBoxClick() {
@@ -162,7 +161,7 @@ export default class CallBox extends Component {
     const {chatCallStatus, chatCallBoxShowing, threadObject} = this.props;
     const {showControl} = this.state;
     const {showing: callBoxShowingType, thread} = chatCallBoxShowing;
-    const {status} = chatCallStatus;
+    const {status, call} = chatCallStatus;
     const incomingCondition = status === CHAT_CALL_STATUS_INCOMING;
     const {thread: currentThread, threadFetching} = threadObject;
     const fullScreenCondition = callBoxShowingType === CHAT_CALL_BOX_FULL_SCREEN || mobileCheck();
@@ -193,11 +192,18 @@ export default class CallBox extends Component {
       {(callBoxShowingType === CHAT_CALL_BOX_NORMAL || callBoxShowingType === CHAT_CALL_BOX_FULL_SCREEN) &&
       <Fragment>
         <Container className={style.CallBox__Scene}>
-          {isGroup(thread) ?
-            <CallBoxSceneGroup chatCallStatus={chatCallStatus} chatCallBoxShowing={chatCallBoxShowing}/>
-            :
-            <CallBoxScenePerson chatCallStatus={chatCallStatus} chatCallBoxShowing={chatCallBoxShowing}/>
-          }
+          <>
+            {isGroup(thread) ?
+              <CallBoxSceneGroup chatCallStatus={chatCallStatus} chatCallBoxShowing={chatCallBoxShowing}/>
+              :
+              <CallBoxScenePerson chatCallStatus={chatCallStatus} chatCallBoxShowing={chatCallBoxShowing}/>
+            }
+            {isRecording(call) &&
+              <Container className={style.CallBox__RecordingContainer}>
+                <CallBoxRecording call={call}/>
+              </Container>
+            }
+          </>
         </Container>
         <Container className={CallBoxControlSetClassNames}>
           <CallBoxControlSet stopRingtone={this.stopRingtone} className={style.CallBox__ControlSet}/>

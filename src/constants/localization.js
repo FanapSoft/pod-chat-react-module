@@ -318,7 +318,8 @@ let strings = new LocalizedStrings({
     threadParticipantList: "لیست اعضا گروه",
     ok: "باشه",
     youSuccessfullyShowCallButtons: "شما دکمه های تماس رو فعال کردی!!!",
-    shareScreen: "اشتراک صفحه نمایش"
+    shareScreen: "اشتراک صفحه نمایش",
+    recordCallSession: "ظبط جلسه تماس"
   },
   it: {}
 });

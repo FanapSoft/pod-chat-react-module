@@ -6,7 +6,7 @@ import Cookies from "js-cookie";
 import {threadCreateWithExistThread, threadGoToMessageId} from "../actions/threadActions";
 import {
   chatCallEndScreenShare,
-  chatCallStartScreenShare
+  chatCallStartScreenShare, chatStartCallRecording, chatStartRecordingCall, chatStopCallRecording, chatStopRecordingCall
 } from "../actions/chatActions";
 
 //components
@@ -34,7 +34,7 @@ import {
 import style from "../../styles/app/CallBoxControlSetMore.scss";
 import {
   getMessageMetaData,
-  isGroup,
+  isGroup, isRecording, isRecordingOwnerIsMe,
   isScreenShare,
   isScreenShareOwnerIsMe,
   isVideoCall,
@@ -68,6 +68,7 @@ export default class CallBoxControlSetMore extends Component {
     this.onCallToneClick = this.onCallToneClick.bind(this);
     this.onViewModeClick = this.onViewModeClick.bind(this);
     this.shareScreenClick = this.shareScreenClick.bind(this);
+    this.onRecordingClick = this.onRecordingClick.bind(this);
     this.onClose = this.onClose.bind(this);
     const currentSettings = JSON.parse(Cookies.get(CALL_SETTING_COOKIE_KEY_NAME) || "{}");
     this.state = {
@@ -122,6 +123,12 @@ export default class CallBoxControlSetMore extends Component {
     this.onClose();
   }
 
+  onRecordingClick(isRecording) {
+    const {dispatch} = this.props;
+    dispatch(isRecording ? chatStopCallRecording() : chatStartCallRecording());
+    this.onClose();
+  }
+
   onClose(e) {
     const {onMoreActionClick} = this.props;
     onMoreActionClick(false);
@@ -132,10 +139,14 @@ export default class CallBoxControlSetMore extends Component {
     const {ringToneSound, callToneSound, groupVideoCallMode} = this.state;
     const {status, call} = chatCallStatus;
     const isScreenSharing = isScreenShare(call) && isScreenShareOwnerIsMe(call.screenShare, user);
+    const isRecordingCall = isRecording(call);
+    const isRecordingCallOwnerIsMe = isRecordingCall && isRecordingOwnerIsMe(call.recording, user);
     const settingItemClassNames = classnames({
       [style.CallBoxControlSetMore__SettingItemContainer]: true
     });
-    const grayLikeScreenShareText = status !== CHAT_CALL_STATUS_STARTED;
+    const enableRecordingAndScreenSharingFeature = status === CHAT_CALL_STATUS_STARTED;
+    const enableCallRecordingFeature = enableRecordingAndScreenSharingFeature && (isRecordingCallOwnerIsMe || !isRecordingCall);
+    const isCallRecordingByMe = enableCallRecordingFeature && isRecordingCallOwnerIsMe;
 
     return <Modal isOpen={true} wrapContent userSelect="none" onClose={this.onClose} onClick={e => e.stopPropagation()}>
 
@@ -166,22 +177,41 @@ export default class CallBoxControlSetMore extends Component {
           </ListItem>
           }
 
-
-
-          <ListItem selection invert onSelect={!grayLikeScreenShareText && this.shareScreenClick.bind(this, isScreenSharing)}>
+          <ListItem selection invert
+                    onSelect={enableRecordingAndScreenSharingFeature && this.shareScreenClick.bind(this, isScreenSharing)}>
 
             <Container className={settingItemClassNames}>
 
               <Container className={style.CallBoxControlSetMore__SettingItemText}>
                 <MdOutlineScreenShare size={style.iconSizeMd} color={style.colorGrayDark}/>
                 <Gap x={20}>
-                  <Text color={grayLikeScreenShareText && "gray"}>{strings.shareScreen}</Text>
+                  <Text color={!enableRecordingAndScreenSharingFeature && "gray"}>{strings.shareScreen}</Text>
                 </Gap>
               </Container>
 
               <Container className={style.CallBoxControlSetMore__SettingItemStatus}>
                 <Text size="sm"
                       color={isScreenSharing ? "green" : "red"}>{isScreenSharing ? strings.active : strings.inActive}</Text>
+              </Container>
+
+            </Container>
+          </ListItem>
+
+          <ListItem selection invert
+                    onSelect={enableCallRecordingFeature && this.onRecordingClick.bind(this, isCallRecordingByMe)}>
+
+            <Container className={settingItemClassNames}>
+
+              <Container className={style.CallBoxControlSetMore__SettingItemText}>
+                <MdMic size={style.iconSizeMd} color={style.colorGrayDark}/>
+                <Gap x={20}>
+                  <Text color={(!enableCallRecordingFeature) && "gray"}>{strings.recordCallSession}</Text>
+                </Gap>
+              </Container>
+
+              <Container className={style.CallBoxControlSetMore__SettingItemStatus}>
+                <Text size="sm"
+                      color={isCallRecordingByMe ? "green" : "red"}>{ isCallRecordingByMe ? strings.active : strings.inActive}</Text>
               </Container>
 
             </Container>
