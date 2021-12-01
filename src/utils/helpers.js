@@ -295,6 +295,10 @@ export function isSystemMessage(message) {
   return message.messageType === 13 || message.messageType === 14;
 }
 
+export function isCallRecordingSessionMessage(message) {
+  return message.messageType === 11;
+}
+
 
 export function prettifyMessageDate(passedTime) {
   const isToday = date.isToday(passedTime);

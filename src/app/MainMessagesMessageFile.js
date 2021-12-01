@@ -6,7 +6,7 @@ import "moment/locale/fa";
 import {
   getImage,
   getMessageMetaData,
-  humanFileSize, isMessageHasError,
+  humanFileSize, isCallRecordingSessionMessage, isMessageHasError,
   isMessageIsDownloadable,
   isMessageIsImage,
   isMessageIsSound,
@@ -49,6 +49,7 @@ import MainMessagesMessageBoxSeen from "./MainMessagesMessageBoxSeen";
 
 //styling
 import style from "../../styles/app/MainMessagesMessageFile.scss";
+import {getMomentDate} from "../utils/date";
 
 
 
@@ -341,7 +342,10 @@ class MainMessagesMessageFile extends Component {
                     <MdMic size={style.iconSizeSm} color={style.colorAccent}/>
                     :
                     <Text wordWrap="breakWord" bold>
-                      {(metaData.file && metaData.file.originalName) || metaData.name}
+                      {isCallRecordingSessionMessage(message) ?
+                        `call-recording-session-${getMomentDate(message.timeMiliSeconds).format("YYYY-MM-DD-HH-mm")}.mp3`
+                        :
+                        (metaData.file && metaData.file.originalName) || metaData.name}
                     </Text>
                   }
 

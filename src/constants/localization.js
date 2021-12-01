@@ -319,7 +319,8 @@ let strings = new LocalizedStrings({
     ok: "باشه",
     youSuccessfullyShowCallButtons: "شما دکمه های تماس رو فعال کردی!!!",
     shareScreen: "اشتراک صفحه نمایش",
-    recordCallSession: "ظبط جلسه تماس"
+    recordCallSession: "ظبط جلسه تماس",
+    isRecordingCallSession: name => `${name} در حال ظبط جلسه تماس`
   },
   it: {}
 });

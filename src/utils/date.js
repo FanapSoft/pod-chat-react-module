@@ -2,7 +2,7 @@ import moment from "moment";
 import strings from "../constants/localization";
 import {getNow} from "./helpers";
 
-function getMomentDate(date) {
+export function getMomentDate(date) {
   return moment(new Date(date || getNow()))
 }
 
