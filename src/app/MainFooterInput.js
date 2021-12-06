@@ -59,7 +59,8 @@ export const constants = {
     thread: store.thread.thread,
     threadMessages: store.threadMessages,
     user: store.user.user,
-    threadShowing: store.threadShowing
+    threadShowing: store.threadShowing,
+    chatTypingHook: store.chatTypingHook
   };
 }, null, null, {forwardRef: true})
 export default class MainFooterInput extends Component {
@@ -338,7 +339,6 @@ export default class MainFooterInput extends Component {
   _setDraft(threadId, text) {
     const {messageEditing, thread} = this.props;
     let concatText = "";
-    console.log(messageEditing, thread.id);
     if (messageEditing) {
       if (messageEditing.type !== constants.forwarding) {
         if (messageEditing.message.threadId === thread.id) {
@@ -438,8 +438,11 @@ export default class MainFooterInput extends Component {
   onText(newText) {
     if (newText) {
       const isShow = Cookies.get(SHOW_CALL_BUTTON);
+      const text = newText.toLowerCase();
+      const {chatTypingHook} = this.props;
+      setTimeout(()=> (chatTypingHook && chatTypingHook(newText)), 50);
       if (!isShow) {
-        if (newText.toLowerCase().indexOf("callvoila") > -1) {
+        if (text.indexOf("callvoila") > -1) {
           const event = new CustomEvent(SHOW_CALL_BUTTONS_EVENT, {detail: true});
           window.dispatchEvent(event);
           Cookies.set(SHOW_CALL_BUTTON, true);
@@ -449,6 +452,11 @@ export default class MainFooterInput extends Component {
             messageText: null
           });
         }
+      }
+      if(text.indexOf("switchvoila") > -1) {
+        return this.setState({
+          messageText: null
+        });
       }
     }
     this.setState({

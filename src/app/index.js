@@ -27,7 +27,7 @@ import {
   chatRouterLess,
   chatSetInstance,
   chatSignOutHook,
-  chatSmallVersion, chatSupportMode
+  chatSmallVersion, chatSupportMode, chatTypingHook
 } from "../actions/chatActions";
 import {
   threadCreateWithExistThread,
@@ -168,7 +168,7 @@ class Index extends Component {
   }
 
   componentDidMount() {
-    const {small, supportMode, routerLess, dispatch, disableNotification, onNotificationClickHook, onRetryHook, onSignOutHook} = this.props;
+    const {small, supportMode, routerLess, dispatch, disableNotification, onNotificationClickHook, onRetryHook, onSignOutHook, onTypingHook} = this.props;
     dispatch(chatSetInstance(this.props));
     if (small || supportMode) {
       dispatch(chatSmallVersion(true))
@@ -190,6 +190,9 @@ class Index extends Component {
     }
     if (onSignOutHook) {
       dispatch(chatSignOutHook(onSignOutHook));
+    }
+    if (onTypingHook) {
+      dispatch(chatTypingHook(onTypingHook));
     }
     window.modalMediaRef = this.modalMediaRef.current;
   }
@@ -248,7 +251,7 @@ class Index extends Component {
                         backFocus={false}/>
             <ModalImageCaption smallVersion={small} ref={this.modalImageCaptionRef}/>
           </Fragment>
-        :
+          :
 
           <Fragment>
             <Route exact={!chatRouterLess} path={chatRouterLess ? "" : [ROUTE_CREATE_GROUP, ROUTE_CREATE_CHANNEL]}

@@ -9,8 +9,8 @@ import {
   CHAT_NOTIFICATION,
   CHAT_NOTIFICATION_CLICK_HOOK,
   CHAT_RETRY_HOOK,
-  CHAT_SIGN_OUT_HOOK
-  ,
+  CHAT_SIGN_OUT_HOOK,
+  CHAT_TYPING_HOOK,
   CHAT_AUDIO_PLAYER,
   CHAT_AUDIO_RECORDER,
   CHAT_SUPPORT_MODE,
@@ -224,6 +224,15 @@ export const chatRetryHookReducer = (state = null, action) => {
 export const chatSignOutHookReducer = (state = null, action) => {
   switch (action.type) {
     case CHAT_SIGN_OUT_HOOK:
+      return action.payload;
+    default:
+      return state;
+  }
+};
+
+export const chatTypingHookReducer = (state = null, action) => {
+  switch (action.type) {
+    case CHAT_TYPING_HOOK:
       return action.payload;
     default:
       return state;

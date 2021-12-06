@@ -54,7 +54,7 @@ import {
   CHAT_CALL_PARTICIPANT_LEFT,
   CHAT_CALL_PARTICIPANT_JOINED,
   CHAT_CALL_PARTICIPANT_LIST_CHANGE,
-  CHAT_CALL_GROUP_VIDEO_VIEW_MODE, CHAT_CALL_GROUP_SETTINGS_SHOWING
+  CHAT_CALL_GROUP_VIDEO_VIEW_MODE, CHAT_CALL_GROUP_SETTINGS_SHOWING, CHAT_TYPING_HOOK
 } from "../constants/actionTypes";
 import {messageInfo} from "./messageActions";
 import {THREAD_HISTORY_LIMIT_PER_REQUEST} from "../constants/historyFetchLimits";
@@ -734,6 +734,12 @@ export const chatSignOutHook = chatSignOutHookHook => {
   return {
     type: CHAT_SIGN_OUT_HOOK,
     payload: () => chatSignOutHookHook
+  }
+};
+export const chatTypingHook = onTypingHook => {
+  return {
+    type: CHAT_TYPING_HOOK,
+    payload: () => onTypingHook
   }
 };
 

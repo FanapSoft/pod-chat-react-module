@@ -64,7 +64,6 @@ export default class LeftAsideMain extends Component {
       seeListLoading: true
     });
     dispatch(messageGetSeenList(messageId)).then(result => {
-      console.log(result.filter(e=>e.id !== user.user.id), user, result)
       this.setState({
         seenList: result ? result.filter(e=>e.id !== user.user.id) : [],
         seeListLoading: false
