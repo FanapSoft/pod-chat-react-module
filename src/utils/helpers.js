@@ -850,8 +850,8 @@ export function findRemoteStreams(user, participants, callDivs) {
   }
 }
 
-export function analyzeCallStatus(message, thread) {
-  const isMessageByMeBool = isMessageByMe(message);
+export function analyzeCallStatus(message, user, thread) {
+  const isMessageByMeBool = isMessageByMe(message, user, thread);
   const {
     createTime,
     startTime,

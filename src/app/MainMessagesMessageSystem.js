@@ -40,7 +40,7 @@ export default class MainMessagesMessageText extends Component {
       user,
       thread
     } = this.props;
-    const AnalyzeResult = analyzeCallStatus(message, thread);
+    const AnalyzeResult = analyzeCallStatus(message, user, thread);
     if (!AnalyzeResult) {
       return ""
     }

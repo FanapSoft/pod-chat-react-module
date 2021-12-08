@@ -94,14 +94,14 @@ export default class Notification extends Component {
       notificationMessage = strings.batchMessageSentToThread(messageToNotify.length, isGroup(thread), isChannel(thread))
     } else {
       const isSystemMessageBool = isSystemMessage(messageToNotify);
-      if(isSystemMessageBool) {
-        if(!analyzeCallStatus(messageToNotify, thread)?.Text()) {
+      if (isSystemMessageBool) {
+        if (!analyzeCallStatus(messageToNotify, user, thread)?.Text()) {
           return;
         }
       }
       const isMessageFile = isMessageIsFile(messageToNotify);
       const tag = document.createElement("div");
-      tag.innerHTML = isSystemMessageBool ? analyzeCallStatus(messageToNotify, thread)?.Text() : messageToNotify.message;
+      tag.innerHTML = isSystemMessageBool ? analyzeCallStatus(messageToNotify, user, thread)?.Text() : messageToNotify.message;
       const newMessageText = messageToNotify.message;
       const personName = `${thread.group ? `${messageToNotify.participant && (messageToNotify.participant.contactName || messageToNotify.participant.name)}: ` : ""}`;
       notificationMessage = `${personName}${isMessageFile ? newMessageText ? newMessageText : strings.sentAFile : tag.innerText}`;
@@ -217,11 +217,11 @@ export default class Notification extends Component {
         newMessage = false;
       }
       if (newPinMessage || newMessage) {
-        if(supportMode) {
-          if(messageNew && messageNew.threadId !== supportMode) {
+        if (supportMode) {
+          if (messageNew && messageNew.threadId !== supportMode) {
             return;
           }
-          if(newPinMessage && newPinMessage.threadId !== supportMode) {
+          if (newPinMessage && newPinMessage.threadId !== supportMode) {
             return;
           }
         }
