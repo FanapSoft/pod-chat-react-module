@@ -25,6 +25,10 @@
   overflow: hidden;
 }
 
+.CallBoxSceneGroupVideoThumbnail__List--fullScreen {
+  height: 250px;
+}
+
 .CallBoxSceneGroupVideoThumbnail__ListContainer {
   display: flex;
   max-width: 500px;
@@ -45,10 +49,13 @@
   min-width: 90px;
   margin: 0 2px;
   border-radius: 5px;
+  position: relative;
 }
 
 .CallBoxSceneGroupVideoThumbnail__MuteContainer {
-
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 .CallBoxSceneGroupVideoThumbnail__CamVideoContainer {

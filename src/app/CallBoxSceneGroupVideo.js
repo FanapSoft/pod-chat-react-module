@@ -24,6 +24,7 @@ import CallBoxSceneGroupParticipantsControl from "./CallBoxSceneGroupParticipant
 //styling
 import style from "../../styles/app/CallBoxSceneGroupVideo.scss";
 import CallBoxSceneGroupVideoThumbnail from "./CallBoxSceneGroupVideoThumbnail";
+import {isScreenShare} from "../utils/helpers";
 
 
 @connect(store => {
@@ -50,14 +51,15 @@ export default class CallBoxSceneGroupVideo extends Component {
     });
   }
 
-  _injectVideo(injectTo, sendTopic, local) {
+  _injectVideo(injectTo, participantId) {
     const {call} = this.props.chatCallStatus;
-    if (call.uiRemoteVideo || call.uiLocalVideo) {
-      const id = `uiRemoteVideo-Vi-${sendTopic}`;
-      const videoTag = local ? call.uiLocalVideo : document.getElementById(id);
+    const {uiElements} = call;
+    if (uiElements) {
+      let videoTag = uiElements[participantId];
       if (!videoTag) {
         return injectTo.innerHTML = `<video class="CallBoxSceneGroupVideo__CamVideo" disablepictureinpicture="" autoplay="" loop="" name="media"><source src="https://www.w3schools.com/tags/movie.mp4" type="video/mp4"></video>`;
       }
+      videoTag = videoTag.video;
       videoTag.setAttribute("class", style.CallBoxSceneGroupVideo__CamVideo);
       videoTag.removeAttribute("height");
       videoTag.removeAttribute("width");
@@ -69,12 +71,12 @@ export default class CallBoxSceneGroupVideo extends Component {
   _traverseOverContactForInjecting() {
     let {filterParticipants, grid} = this._getGridContacts();
     filterParticipants.map((participant, index) => {
-      const id = participant.sendTopic;
+      const id = `video-${participant.id}`;
       const tag = document.getElementById(id);
       if (tag) {
         if (tag.firstChild) {
         } else {
-          this._injectVideo(tag, id, participant.id === this.props.user.id);
+          this._injectVideo(tag, participant.id);
         }
       }
     });
@@ -83,7 +85,7 @@ export default class CallBoxSceneGroupVideo extends Component {
   shouldComponentUpdate(nextProps, nextState, nextContext) {
     const {groupVideoCallMode: oldGroupVideoCallMode} = this.state;
     const {groupVideoCallMode} = nextState;
-    if(oldGroupVideoCallMode !== groupVideoCallMode) {
+    if (oldGroupVideoCallMode !== groupVideoCallMode) {
       this.resetMediaSourceLocation();
     }
     return true;
@@ -111,10 +113,14 @@ export default class CallBoxSceneGroupVideo extends Component {
   }
 
   _getGridContacts() {
-    const {chatCallParticipantList} = this.props;
-    const filterParticipants = chatCallParticipantList.filter(partcipant => partcipant.callStatus && partcipant.callStatus === 6);
+    const {chatCallParticipantList, chatCallStatus} = this.props;
+    const {call} = chatCallStatus;
+    const {uiElements} = call;
     const grid = {rows: 2, columns: 1, itemsCell: []};
-
+    if (!uiElements) {
+      return {grid, filterParticipants: []};
+    }
+    const filterParticipants = chatCallParticipantList.filter(participant => uiElements[participant.id]);
     function buildRowColumn(index, columnException, toColumnException, rowException, rowToException) {
       const workingIndex = index + 1;
       const row = rowException || Math.ceil(workingIndex / 2);
@@ -173,7 +179,13 @@ export default class CallBoxSceneGroupVideo extends Component {
 
 
   render() {
-    const {chatCallStatus, chatCallBoxShowing, user, chatCallParticipantList, chatCallGroupSettingsShowing} = this.props;
+    const {
+      chatCallStatus,
+      chatCallBoxShowing,
+      user,
+      chatCallParticipantList,
+      chatCallGroupSettingsShowing
+    } = this.props;
     const {groupVideoCallMode, groupVideoCallThumbnailParticipant} = this.state;
     const fullScreenCondition = chatCallBoxShowing.showing === CHAT_CALL_BOX_FULL_SCREEN;
     let {filterParticipants, grid} = this._getGridContacts();
@@ -188,8 +200,10 @@ export default class CallBoxSceneGroupVideo extends Component {
       [style["CallBoxSceneGroupVideo__Grid--fullScreen"]]: fullScreenCondition
     });
 
+    const isScreenShareResult = isScreenShare(chatCallStatus.call);
+
     return <Container className={classNames}>
-      {groupVideoCallMode === GROUP_VIDEO_CALL_VIEW_MODE.GRID_VIEW ?
+      {!isScreenShareResult && groupVideoCallMode === GROUP_VIDEO_CALL_VIEW_MODE.GRID_VIEW ?
         <Container className={gridClassNames} style={{gridTemplate: grid.template}}>
           {filterParticipants.map((participant, index) =>
             <Container className={style.CallBoxSceneGroupVideo__CamContainer}
@@ -204,12 +218,15 @@ export default class CallBoxSceneGroupVideo extends Component {
                           style={{margin: "3px 4px"}}/>
                 }
               </Container>
-              <Container id={participant.sendTopic} className={style.CallBoxSceneGroupVideo__CamVideoContainer}/>
+              <Container id={`video-${participant.id}`} className={style.CallBoxSceneGroupVideo__CamVideoContainer}/>
             </Container>
           )}
         </Container> :
         <CallBoxSceneGroupVideoThumbnail participant={groupVideoCallThumbnailParticipant}
-                                         chatCallSdtatus={chatCallStatus}
+                                         isScreenShare={isScreenShareResult}
+                                         chatCallStatus={chatCallStatus}
+                                         chatCallBoxShowing={chatCallBoxShowing}
+                                         injectVideo={this._injectVideo}
                                          resetMediaSourceLocation={this.resetMediaSourceLocation}
                                          traverseOverContactForInjecting={this._traverseOverContactForInjecting}/>
       }

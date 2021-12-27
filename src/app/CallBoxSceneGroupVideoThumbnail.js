@@ -50,19 +50,25 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     let {sceneParticipant} = prevState;
     let {sceneParticipant: nowSceneParticipant} = this.state;
-    const {traverseOverContactForInjecting, participant, chatCallParticipantList} = this.props;
+    const {isScreenShare, traverseOverContactForInjecting, participant, chatCallParticipantList} = this.props;
+    const {isScreenShare: oldIsScreenShare, injectVideo} = this.props;
     sceneParticipant = sceneParticipant || participant;
-    const goForInjectingCondition = ((sceneParticipant && nowSceneParticipant) && (sceneParticipant.id !== nowSceneParticipant.id)) || !sceneParticipant;
-    if (goForInjectingCondition) {
-      nowSceneParticipant = nowSceneParticipant && nowSceneParticipant.id ? nowSceneParticipant : chatCallParticipantList && chatCallParticipantList[0];
-      if (!nowSceneParticipant) {
-        return;
+    const goForInjectingCondition = (isScreenShare !== oldIsScreenShare) || ((sceneParticipant && nowSceneParticipant) && (sceneParticipant.id !== nowSceneParticipant.id)) || !sceneParticipant;
+    if (goForInjectingCondition)
+      if (!isScreenShare) {
+        nowSceneParticipant = nowSceneParticipant && nowSceneParticipant.id ? nowSceneParticipant : chatCallParticipantList && chatCallParticipantList[0];
+        if (!nowSceneParticipant) {
+          return;
+        }
       }
-      const tag = document.getElementById(nowSceneParticipant.sendTopic);
-      if (tag) {
-        tag.innerHTML = "";
-        traverseOverContactForInjecting();
+
+    const tag = document.getElementById(isScreenShare ? 'screenShare' : `video-${nowSceneParticipant.id}`);
+    if (tag) {
+      if (isScreenShare) {
+        return injectVideo(tag, "screenShare");
       }
+      tag.innerHTML = "";
+      traverseOverContactForInjecting();
     }
   }
 
@@ -70,7 +76,8 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
     this.props.resetMediaSourceLocation();
   }
 
-  onParticipantClick(participant) {
+  onParticipantClick(participant, e) {
+    e.stopPropagation();
     this.props.resetMediaSourceLocation();
     this.setState({
       sceneParticipant: participant
@@ -78,14 +85,20 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
   }
 
   render() {
-    const {chatCallBoxShowing, user, chatCallParticipantList, participant} = this.props;
+    const {chatCallStatus, chatCallParticipantList, participant, chatCallBoxShowing, isScreenShare} = this.props;
     let {sceneParticipant} = this.state;
+    const fullScreenCondition = chatCallBoxShowing.showing === CHAT_CALL_BOX_FULL_SCREEN;
     sceneParticipant = sceneParticipant || participant;
     sceneParticipant = sceneParticipant && sceneParticipant.id ? sceneParticipant : chatCallParticipantList.find(partcipant => partcipant.id === sceneParticipant);
     if (!sceneParticipant) {
       sceneParticipant = chatCallParticipantList && chatCallParticipantList[0];
     }
-    let filterParticipants = chatCallParticipantList.filter(participant => participant.callStatus && participant.callStatus === 6 && participant.id !== sceneParticipant.id);
+    const {call} = chatCallStatus;
+    const {uiElements} = call;
+    let filterParticipants = [];
+    if (uiElements) {
+      filterParticipants = chatCallParticipantList.filter(participant => uiElements[participant.id] && (isScreenShare || participant.id !== sceneParticipant.id));
+    }
     if (!sceneParticipant) {
       sceneParticipant = {};
     }
@@ -93,12 +106,17 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
       [style.CallBoxSceneGroupVideoThumbnail]: true,
     });
 
+    const listClassNames = classnames({
+      [style.CallBoxSceneGroupVideoThumbnail__List]: true,
+      [style["CallBoxSceneGroupVideoThumbnail__List--fullScreen"]]: fullScreenCondition
+    })
+
     return <Container className={classNames}>
       <Container className={style.CallBoxSceneGroupVideoThumbnail__Scene}>
-        <Container id={sceneParticipant.sendTopic}
+        <Container id={isScreenShare ? "video-screenShare" : `video-${sceneParticipant.id}`}
                    className={style.CallBoxSceneGroupVideoThumbnail__CamVideoContainer}/>
       </Container>
-      <Container className={style.CallBoxSceneGroupVideoThumbnail__List}>
+      <Container className={listClassNames}>
         <Container className={style.CallBoxSceneGroupVideoThumbnail__ListContainer}>
           <Container className={style.CallBoxSceneGroupVideoThumbnail__ListScroller}>
             {filterParticipants.map((participant, index) =>
@@ -112,7 +130,7 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
                             style={{margin: "3px 4px"}}/>
                   }
                 </Container>
-                <Container id={participant.sendTopic}
+                <Container id={`video-${participant.id}`}
                            className={style.CallBoxSceneGroupVideoThumbnail__CamVideoContainer}/>
               </Container>
             )}
