@@ -98,8 +98,8 @@ class MyApp extends Component {
 
 #### Support mode
 
-You can use *podchatweb* as support mode module with this simple config.
-[![Support mode][support_mode]][support_mode_url]
+You can use *podchatweb* as support mode module with this simple config.<br/><br/>
+<img src="https://raw.githubusercontent.com/FanapSoft/pod-chat-react-module/master/docs/support-mode.png" width="200">
 
 ```jsx
 import {PodchatJSX} from "podchatweb";
