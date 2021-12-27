@@ -24,7 +24,7 @@ import CallBoxSceneGroupParticipantsControl from "./CallBoxSceneGroupParticipant
 //styling
 import style from "../../styles/app/CallBoxSceneGroupVideo.scss";
 import CallBoxSceneGroupVideoThumbnail from "./CallBoxSceneGroupVideoThumbnail";
-import {isScreenShare} from "../utils/helpers";
+import {isScreenShare, isVideoCall} from "../utils/helpers";
 
 
 @connect(store => {
@@ -60,6 +60,9 @@ export default class CallBoxSceneGroupVideo extends Component {
         return injectTo.innerHTML = `<video class="CallBoxSceneGroupVideo__CamVideo" disablepictureinpicture="" autoplay="" loop="" name="media"><source src="https://www.w3schools.com/tags/movie.mp4" type="video/mp4"></video>`;
       }
       videoTag = videoTag.video;
+      if (!videoTag) {
+        return;
+      }
       videoTag.setAttribute("class", style.CallBoxSceneGroupVideo__CamVideo);
       videoTag.removeAttribute("height");
       videoTag.removeAttribute("width");
@@ -101,10 +104,12 @@ export default class CallBoxSceneGroupVideo extends Component {
 
   resetMediaSourceLocation() {
     const {call} = this.props.chatCallStatus;
-    if (call.uiRemoteVideo) {
-      const callDivTag = document.getElementById(CALL_DIV_ID);
-      callDivTag.append(call.uiRemoteVideo);
-      callDivTag.append(call.uiLocalVideo);
+    const {uiElements} = call;
+    if (uiElements) {
+      for(const element of Object.keys(uiElements)) {
+        const callDivTag = document.getElementById(CALL_DIV_ID);
+        callDivTag.append(uiElements[element].video);
+      }
     }
   }
 
@@ -121,6 +126,7 @@ export default class CallBoxSceneGroupVideo extends Component {
       return {grid, filterParticipants: []};
     }
     const filterParticipants = chatCallParticipantList.filter(participant => uiElements[participant.id]);
+
     function buildRowColumn(index, columnException, toColumnException, rowException, rowToException) {
       const workingIndex = index + 1;
       const row = rowException || Math.ceil(workingIndex / 2);
@@ -201,6 +207,7 @@ export default class CallBoxSceneGroupVideo extends Component {
     });
 
     const isScreenShareResult = isScreenShare(chatCallStatus.call);
+    const isVideoCalling = isVideoCall(chatCallStatus.call);
 
     return <Container className={classNames}>
       {!isScreenShareResult && groupVideoCallMode === GROUP_VIDEO_CALL_VIEW_MODE.GRID_VIEW ?
@@ -224,9 +231,10 @@ export default class CallBoxSceneGroupVideo extends Component {
         </Container> :
         <CallBoxSceneGroupVideoThumbnail participant={groupVideoCallThumbnailParticipant}
                                          isScreenShare={isScreenShareResult}
+                                         isVideoCall={isVideoCalling}
                                          chatCallStatus={chatCallStatus}
                                          chatCallBoxShowing={chatCallBoxShowing}
-                                         injectVideo={this._injectVideo}
+                                         injectVideo={this._injectVideo.bind(this)}
                                          resetMediaSourceLocation={this.resetMediaSourceLocation}
                                          traverseOverContactForInjecting={this._traverseOverContactForInjecting}/>
       }

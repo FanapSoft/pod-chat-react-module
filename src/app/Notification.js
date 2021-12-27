@@ -103,7 +103,7 @@ export default class Notification extends Component {
       const tag = document.createElement("div");
       tag.innerHTML = isSystemMessageBool ? analyzeCallStatus(messageToNotify, user, thread)?.Text() : messageToNotify.message;
       const newMessageText = messageToNotify.message;
-      const personName = `${thread.group ? `${messageToNotify.participant && (messageToNotify.participant.contactName || messageToNotify.participant.name)}: ` : ""}`;
+      const personName = `${thread.group && !messageToNotify.callHistory ? `${messageToNotify.participant && (messageToNotify.participant.contactName || messageToNotify.participant.name)}: ` : ""}`;
       notificationMessage = `${personName}${isMessageFile ? newMessageText ? newMessageText : strings.sentAFile : tag.innerText}`;
       if (this.pinNotify) {
         notificationMessage = strings.personPinnedMessage(isChannel(thread));

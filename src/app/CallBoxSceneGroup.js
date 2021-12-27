@@ -6,7 +6,14 @@ import Gap from "raduikit/src/gap";
 import strings from "../constants/localization";
 import CallBoxSceneGroupVideo from "./CallBoxSceneGroupVideo";
 import CallBoxSceneGroupVoice from "./CallBoxSceneGroupVoice";
-import {avatarNameGenerator, avatarUrlGenerator, getMessageMetaData, isVideoCall, mobileCheck} from "../utils/helpers";
+import {
+  avatarNameGenerator,
+  avatarUrlGenerator,
+  getMessageMetaData,
+  isScreenShare,
+  isVideoCall,
+  mobileCheck
+} from "../utils/helpers";
 import {
   CHAT_CALL_BOX_FULL_SCREEN,
   CHAT_CALL_STATUS_INCOMING,
@@ -67,7 +74,7 @@ export default class CallBoxSceneGroup extends Component {
       chatCallBoxShowing,
       user
     };
-    if (isVideoCall(call) && !incomingCondition && startedCondition) {
+    if ((isScreenShare(call) || isVideoCall(call)) && !incomingCondition && startedCondition) {
       return <CallBoxSceneGroupVideo {...commonArgs}/>
     }
     return <Container className={style.CallBoxSceneGroup}>

@@ -152,7 +152,13 @@ export default class MainMessages extends Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    const {messageNew: oldNewMessage, threadGoToMessageId: oldThreadGoToMessageId, threadMessages, dispatch, user} = this.props;
+    const {
+      messageNew: oldNewMessage,
+      threadGoToMessageId: oldThreadGoToMessageId,
+      threadMessages,
+      dispatch,
+      user
+    } = this.props;
     const {messageNew, thread, threadGoToMessageId} = nextProps;
     const {hasNext} = threadMessages;
 
@@ -240,7 +246,14 @@ export default class MainMessages extends Component {
   }
 
   componentDidUpdate(oldProps) {
-    const {thread, threadMessages, threadGetMessageListByMessageIdFetching, threadMessagesPartialFetching, threadUnreadMentionedMessages, dispatch} = this.props;
+    const {
+      thread,
+      threadMessages,
+      threadGetMessageListByMessageIdFetching,
+      threadMessagesPartialFetching,
+      threadUnreadMentionedMessages,
+      dispatch
+    } = this.props;
     const {thread: oldThread} = oldProps;
     const {fetching} = threadMessages;
     const threadId = thread.id;
@@ -577,7 +590,18 @@ export default class MainMessages extends Component {
       threadSelectMessageShowing
     } = this.props;
     const {highLightMessage, bottomButtonShowing, unreadBar, newMessageUnreadCount} = this.state;
-    const {messages, fetching, hasPrevious, hasNext} = threadMessages;
+    let {messages, fetching, hasPrevious, hasNext} = threadMessages;
+/*    messages = messages.filter(message => {
+      const callHistory = message.callHistory;
+      if (!callHistory) {
+        return true;
+      }
+      const isGroupThread = isGroup(thread);
+      if (!isGroupThread) {
+        return [7, 2, 3, 4].indexOf(callHistory.status) > -1;
+      }
+      return [7].indexOf(callHistory.status) > -1;
+    });*/
     const MainMessagesMessageContainerClassNames = (isMessageByMe, messageType) => classnames({
       [style.MainMessages__MessageContainer]: true,
       [style["MainMessages__MessageContainer--left"]]: !isMessageByMe,
@@ -625,11 +649,12 @@ export default class MainMessages extends Component {
                                    active={threadSelectMessageShowing && messageSelectedCondition(message, threadCheckedMessageList)}
                                    activeColor="gray"
                                    noPadding>
-                    <Container className={MainMessagesMessageContainerClassNames(isMessageByMeResult, message.messageType)}
-                               id={`message-${message.time}`}
-                               relative>
+                    <Container
+                      className={MainMessagesMessageContainerClassNames(isMessageByMeResult, message.messageType)}
+                      id={`message-${message.time}`}
+                      relative>
                       {
-                        (isGroupResult && !isMessageByMeResult) &&
+                        (isGroupResult && !isMessageByMeResult && !message.callHistory) &&
                         <MainMessagesAvatar message={message}
                                             isChannel={isChannelResult}
                                             isGroup={isGroupResult}

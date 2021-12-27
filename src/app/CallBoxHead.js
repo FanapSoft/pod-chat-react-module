@@ -17,9 +17,8 @@ import {ButtonFloating} from "../../../pod-chat-ui-kit/src/button"
 import {Text} from "../../../pod-chat-ui-kit/src/typography";
 import {
   MdExpandLess,
-  MdSettings,
   MdFullscreen,
-  MdFullscreenExit
+  MdFullscreenExit, MdGroup
 } from "react-icons/md";
 
 //styling
@@ -136,12 +135,12 @@ export default class CallBoxHead extends Component {
         }
       </Container>
       <Container className={style.CallBoxHead__StatusIconContainer}>
-        {(isVideoCallBool && callStarted && thread && isGroup(thread)) &&
+        {((isScreenShare(call) || isVideoCallBool) && callStarted && thread && isGroup(thread)) &&
         <Fragment>
           {/*          <MdGridOn size={style.iconSizeSm} color={style.colorAccent} style={{marginLeft: "7px", cursor: "pointer"}}
                     onClick={this.switchBetweenView}/>*/}
-          <MdSettings size={style.iconSizeSm} color={style.colorAccent}
-                      style={{marginLeft: "10px", marginBottom: "3px", cursor: "pointer"}}
+          <MdGroup size={style.iconSizeMd} color={style.colorAccent}
+                      style={{marginLeft: "10px",  cursor: "pointer"}}
                       onClick={this.groupSettingView}/>
         </Fragment>
         }

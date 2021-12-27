@@ -138,9 +138,11 @@ export default class CallBoxControlSetMore extends Component {
     const {chatCallStatus, user} = this.props;
     const {ringToneSound, callToneSound, groupVideoCallMode} = this.state;
     const {status, call} = chatCallStatus;
-    const isScreenSharing = isScreenShare(call) && isScreenShareOwnerIsMe(call.screenShare, user);
+    const isScreenShareCall = isScreenShare(call);
+    const isScreenSharingOwnerIsMeResult = isScreenShareCall && isScreenShareOwnerIsMe(call.screenShare, user);
     const isRecordingCall = isRecording(call);
     const isRecordingCallOwnerIsMe = isRecordingCall && isRecordingOwnerIsMe(call.recording, user);
+    const isGroupCall = call.conversationVO && isGroup(call.conversationVO);
     const settingItemClassNames = classnames({
       [style.CallBoxControlSetMore__SettingItemContainer]: true
     });
@@ -152,20 +154,20 @@ export default class CallBoxControlSetMore extends Component {
 
       <ModalBody>
         <List>
-          {call.conversationVO && isGroup(call.conversationVO) &&
-          <ListItem selection invert onSelect={this.onViewModeClick}>
+          {(isGroupCall && isVideoCall(call)) &&
+          <ListItem selection invert onSelect={!isScreenShareCall && this.onViewModeClick}>
 
             <Container className={settingItemClassNames}>
 
               <Container className={style.CallBoxControlSetMore__SettingItemText}>
                 <MdFeaturedVideo size={style.iconSizeMd} color={style.colorGrayDark}/>
                 <Gap x={20}>
-                  <Text>{strings.viewModeConfig}</Text>
+                  <Text color={isScreenShareCall && "gray"}>{strings.viewModeConfig}</Text>
                 </Gap>
               </Container>
 
               <Container className={style.CallBoxControlSetMore__SettingItemStatus}>
-                {groupVideoCallMode === GROUP_VIDEO_CALL_VIEW_MODE.THUMBNAIL_VIEW ?
+                {groupVideoCallMode === GROUP_VIDEO_CALL_VIEW_MODE.THUMBNAIL_VIEW || isScreenShareCall ?
                   <MdViewCarousel size={style.iconSizeMd} color={style.colorGrayDark}/>
                   :
                   <MdViewQuilt size={style.iconSizeMd} color={style.colorGrayDark}/>
@@ -178,7 +180,7 @@ export default class CallBoxControlSetMore extends Component {
           }
 
           <ListItem selection invert
-                    onSelect={enableRecordingAndScreenSharingFeature && this.shareScreenClick.bind(this, isScreenSharing)}>
+                    onSelect={enableRecordingAndScreenSharingFeature && this.shareScreenClick.bind(this, isScreenSharingOwnerIsMeResult)}>
 
             <Container className={settingItemClassNames}>
 
@@ -191,7 +193,7 @@ export default class CallBoxControlSetMore extends Component {
 
               <Container className={style.CallBoxControlSetMore__SettingItemStatus}>
                 <Text size="sm"
-                      color={isScreenSharing ? "green" : "red"}>{isScreenSharing ? strings.active : strings.inActive}</Text>
+                      color={isScreenSharingOwnerIsMeResult ? "green" : "red"}>{isScreenSharingOwnerIsMeResult ? strings.active : strings.inActive}</Text>
               </Container>
 
             </Container>

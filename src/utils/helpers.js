@@ -17,7 +17,7 @@ import {THREAD_ADMIN} from "../constants/privilege";
 import {Text} from "../../../pod-chat-ui-kit/src/typography";
 import {ACTUAL_IMAGE_SIZE, LARGE_IMAGE_SIZE, MEDIUM_IMAGE_SIZE, SMALL_IMAGE_SIZE} from "../constants/podspace";
 import style from "../../styles/utils/ghost.scss";
-import {MdCallMissed, MdCallEnd} from "react-icons/md";
+import {MdCallMissed, MdCallEnd, MdPhoneInTalk} from "react-icons/md";
 
 
 export function humanFileSize(bytes, si) {
@@ -629,6 +629,9 @@ export function getMessageMetaData(message) {
 }
 
 export function showMessageNameOrAvatar(message, messages) {
+  if (message.callHistory) {
+    return false
+  }
   const msgOwnerId = message.participant.id;
   const msgId = message.id || message.uniqueId;
   const index = messages.findIndex(e => e.id === msgId || e.uniqueId === msgId);
@@ -852,12 +855,14 @@ export function findRemoteStreams(user, participants, callDivs) {
 
 export function analyzeCallStatus(message, user, thread) {
   const isMessageByMeBool = isMessageByMe(message, user, thread);
+  const isGroupThread = isGroup(thread);
   const {
     createTime,
     startTime,
     endTime,
     status
   } = message?.callHistory;
+  console.log(status)
   switch (status) {
 
     case 7: {
@@ -881,7 +886,7 @@ export function analyzeCallStatus(message, user, thread) {
         Icon() {
           return <MdCallEnd color={style.colorRed} size={style.iconSizeSm} style={{marginLeft: "5px"}}/>;
         },
-        Text: () => strings.participantRejectYourCall(thread.title, messageDatePetrification(createTime, true))
+        Text: () => isGroupThread ? strings.noBodyAnsweredTheCall(thread.title, messageDatePetrification(createTime, true)) : strings.participantRejectYourCall(thread.title, messageDatePetrification(createTime, true))
       };
     }
     case 3: {
@@ -905,6 +910,16 @@ export function analyzeCallStatus(message, user, thread) {
           }
         };
       }
+    }
+    case 6: {
+        return {
+          Icon() {
+            return <MdPhoneInTalk color={style.colorGreenTick} size={style.iconSizeSm} style={{marginLeft: "5px"}}/>;
+          },
+          Text() {
+            return strings.callStartedAt(messageDatePetrification(startTime, true));
+          }
+        };
     }
     default: {
       return;

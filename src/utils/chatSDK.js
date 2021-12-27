@@ -1,7 +1,7 @@
 import PodChat from "podchat-browser";
 import {promiseDecorator} from "./decorators";
 import React from "react";
-import {callParticipantStandardization, getNow, isAudioFile, isImageFile, isVideoFile} from "./helpers";
+import {callParticipantStandardization, getNow, isAudioFile, isGroup, isImageFile, isVideoFile} from "./helpers";
 import Cookies from "js-cookie";
 import {THREAD_ADMIN} from "../constants/privilege";
 import {types, typesCode} from "../constants/messageTypes";

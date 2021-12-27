@@ -303,15 +303,21 @@ let strings = new LocalizedStrings({
     participantRejectYourCall: (name, date) => {
       return `رد تماس توسط ${name} در ${date}`
     },
+    noBodyAnsweredTheCall: (name, date) => {
+      return `کسی پاسخگوی تماس نبود ${date}`
+    },
     exportMessages: "استخراج پیام ها",
     rangeSelectedFromDateToDate: (fromDate, toDate) => {
       return `انتخاب تاریخ از ${fromDate} تا تاریخ ${toDate}`;
     },
     callEnded: (date, elapsed) => {
-      if(elapsed) {
+      if (elapsed) {
         return `تماس پایان پذیرفت ${date} - مدت تماس ${elapsed}`;
       }
       return `تماس پایان پذیرفت ${date}`
+    },
+    callStartedAt: (date) => {
+      return `تماس درخواستی برقرار شد ${date}`;
     },
     forExportingPleaseEnterDates: "برای استخراج پیام های ابتدا بازه تاریخ را انتخاب نمایید",
     export: "استخراج",
