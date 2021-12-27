@@ -156,10 +156,10 @@ This project is open-sourced software licensed under the [MIT license](http://op
 
 [//]: # (LINKS)
 
-[preview_image]: https://raw.githubusercontent.com/FanapSoft/pod-chat-react-client/master/docs/preview.png "Preview of podchat web"
+[preview_image]: https://raw.githubusercontent.com/FanapSoft/pod-chat-react-module/master/docs/preview.png "Preview of podchat web"
 
-[preview_image_url]: https://raw.githubusercontent.com/FanapSoft/pod-chat-react-client/master/docs/preview.png
+[preview_image_url]: https://raw.githubusercontent.com/FanapSoft/pod-chat-react-module/master/docs/preview.png
 
-[support_mode]: https://raw.githubusercontent.com/FanapSoft/pod-chat-react-client/master/docs/support-mode.png "Support mode"
+[support_mode]: https://raw.githubusercontent.com/FanapSoft/pod-chat-react-module/master/docs/support-mode.png "Support mode"
 
-[support_mode_url]: https://raw.githubusercontent.com/FanapSoft/pod-chat-react-client/master/docs/support-mode.png
+[support_mode_url]: https://raw.githubusercontent.com/FanapSoft/pod-chat-react-module/master/docs/support-mode.png
