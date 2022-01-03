@@ -112,7 +112,7 @@ export default class CallBoxHead extends Component {
     const callStarted = status === CHAT_CALL_STATUS_STARTED;
     const fullScreenCondition = chatCallBoxShowing.showing === CHAT_CALL_BOX_FULL_SCREEN || mobileCheck();
     const isMobileCondition = mobileCheck();
-    const isVideoCallBool = (isVideoCall(call) || (isScreenShare(call) && !isScreenShareOwnerIsMe(call.screenShare, user)));
+    const isVideoCallBool = (isVideoCall(call) || (isScreenShare(call) && (!isScreenShareOwnerIsMe(call.screenShare, user) || isGroup(thread))));
     const accentTextColorCondition = isVideoCallBool && callStarted ? "accent" : "";
     const invertTextColorCondition = (fullScreenCondition && !incomingCondition && !isVideoCallBool) || (isVideoCallBool && fullScreenCondition && !incomingCondition && !callStarted);
     return <Container className={style.CallBoxHead}>
@@ -140,8 +140,8 @@ export default class CallBoxHead extends Component {
           {/*          <MdGridOn size={style.iconSizeSm} color={style.colorAccent} style={{marginLeft: "7px", cursor: "pointer"}}
                     onClick={this.switchBetweenView}/>*/}
           <MdGroup size={style.iconSizeMd} color={style.colorAccent}
-                      style={{marginLeft: "10px",  cursor: "pointer"}}
-                      onClick={this.groupSettingView}/>
+                   style={{marginLeft: "10px", cursor: "pointer"}}
+                   onClick={this.groupSettingView}/>
         </Fragment>
         }
         {!isMobileCondition &&

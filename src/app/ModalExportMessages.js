@@ -80,17 +80,19 @@ class ModalShare extends Component {
     });
     dispatch(messageExport(thread.id, {
       fromTime: rangeSelected.start._d.getTime(),
-      toTime: rangeSelected.end._d.getTime()
+      toTime: rangeSelected.end._d.getTime(),
+      responseType: "link",
+      autoStartDownload: true
     })).then(e => {
       this.setState({
         rangeSelected: null,
         loading: false
       });
-      const linkRef = this.linkRef.current;
-      linkRef.href = window.URL.createObjectURL(e.result);
-      linkRef.download =`talk-export-${fromDateReadable}-${toDateReadable}`;
-      linkRef.click();
-      window.URL.revokeObjectURL(e.result);
+      //const linkRef = this.linkRef.current;
+      //linkRef.href = window.URL.createObjectURL(e.result);
+      //linkRef.download =`talk-export-${fromDateReadable}-${toDateReadable}`;
+      //linkRef.click();
+      //window.URL.revokeObjectURL(e.result);
     });
   }
 

@@ -59,46 +59,38 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
       isVideoCall
     } = this.props;
 
-    const {isScreenShare: oldIsScreenShare} = prevProps;
     sceneParticipant = sceneParticipant || participant;
-    const goForInjectingCondition = (isScreenShare !== oldIsScreenShare) || ((sceneParticipant && nowSceneParticipant) && (sceneParticipant.id !== nowSceneParticipant.id)) || !sceneParticipant;
+
+    if (isScreenShare) {
+      const tag = document.getElementById('video-screenShare');
+      return injectVideo(tag, "screenShare");
+    }
+
+    const goForInjectingCondition = ((sceneParticipant && nowSceneParticipant) && (sceneParticipant.id !== nowSceneParticipant.id)) || !sceneParticipant;
     if (goForInjectingCondition) {
-      if (!isScreenShare) {
-        nowSceneParticipant = nowSceneParticipant && nowSceneParticipant.id ? nowSceneParticipant : chatCallParticipantList && chatCallParticipantList[0];
-        if (!nowSceneParticipant) {
-          return;
-        }
+      nowSceneParticipant = nowSceneParticipant && nowSceneParticipant.id ? nowSceneParticipant : chatCallParticipantList && chatCallParticipantList[0];
+      if (!nowSceneParticipant) {
+        return;
+      }
+      const tag = document.getElementById(`video-${nowSceneParticipant.id}`);
+      if (isVideoCall) {
+        tag.innerHTML = "";
+        traverseOverContactForInjecting();
       }
 
-      const tag = document.getElementById(isScreenShare ? 'video-screenShare' : `video-${nowSceneParticipant.id}`);
-
-      if (tag) {
-        if (isScreenShare) {
-          return setTimeout(() => {
-            injectVideo(tag, "screenShare");
-          }, 100);
-        }
-        if (isVideoCall) {
-          tag.innerHTML = "";
-          traverseOverContactForInjecting();
-        }
-      }
     }
   }
 
   componentDidMount() {
     const {
-      isVideoCall,
       isScreenShare,
       injectVideo
     } = this.props;
-    if (isScreenShare && !isVideoCall) {
-      const tag = document.getElementById(isScreenShare ? 'video-screenShare' : `video-${nowSceneParticipant.id}`);
+    if (isScreenShare) {
+      const tag = document.getElementById('video-screenShare');
 
       if (tag) {
-        return setTimeout(() => {
-          injectVideo(tag, "screenShare");
-        }, 100);
+        injectVideo(tag, "screenShare");
       }
     }
 
@@ -150,34 +142,39 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
       [style["CallBoxSceneGroupVideoThumbnail__List--fullScreen"]]: fullScreenCondition
     })
 
+    const sceneClassNames = classnames({
+      [style.CallBoxSceneGroupVideoThumbnail__Scene]: true,
+      [style["CallBoxSceneGroupVideoThumbnail__Scene--screenShare"]]: isScreenShare
+    })
+
     return <Container className={classNames}>
-      <Container className={style.CallBoxSceneGroupVideoThumbnail__Scene}>
+      <Container className={sceneClassNames}>
         <Container id={isScreenShare ? "video-screenShare" : `video-${sceneParticipant.id}`}
                    className={style.CallBoxSceneGroupVideoThumbnail__CamVideoContainer}/>
       </Container>
       {isVideoCall &&
-        <Container className={listClassNames}>
-          <Container className={style.CallBoxSceneGroupVideoThumbnail__ListContainer}>
-            <Container className={style.CallBoxSceneGroupVideoThumbnail__ListScroller}>
-              {filterParticipants.map((participant, index) =>
-                <Container className={style.CallBoxSceneGroupVideoThumbnail__ListItem}
-                           key={participant.id}
-                           onClick={this.onParticipantClick.bind(this, participant)}>
-                  <Container className={style.CallBoxSceneGroupVideoThumbnail__MuteContainer}>
-                    {participant && participant.mute &&
-                    <MdMicOff size={style.iconSizeXs}
-                              color={style.colorAccent}
-                              style={{margin: "3px 4px"}}/>
-                    }
-                  </Container>
-                  <Container id={`video-${participant.id}`}
-                             className={style.CallBoxSceneGroupVideoThumbnail__CamVideoContainer}/>
+      <Container className={listClassNames}>
+        <Container className={style.CallBoxSceneGroupVideoThumbnail__ListContainer}>
+          <Container className={style.CallBoxSceneGroupVideoThumbnail__ListScroller}>
+            {filterParticipants.map((participant, index) =>
+              <Container className={style.CallBoxSceneGroupVideoThumbnail__ListItem}
+                         key={participant.id}
+                         onClick={!isScreenShare && this.onParticipantClick.bind(this, participant)}>
+                <Container className={style.CallBoxSceneGroupVideoThumbnail__MuteContainer}>
+                  {participant && participant.mute &&
+                  <MdMicOff size={style.iconSizeXs}
+                            color={style.colorAccent}
+                            style={{margin: "3px 4px"}}/>
+                  }
                 </Container>
-              )}
-            </Container>
+                <Container id={`video-${participant.id}`}
+                           className={style.CallBoxSceneGroupVideoThumbnail__CamVideoContainer}/>
+              </Container>
+            )}
           </Container>
-
         </Container>
+
+      </Container>
       }
     </Container>
   }

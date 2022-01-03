@@ -455,7 +455,7 @@ export function isChannel(thread) {
 }
 
 export function isGroup(thread) {
-  if (thread.group) {
+  if (thread?.group) {
     if (thread.type !== 8) {
       return true;
     }
@@ -862,7 +862,6 @@ export function analyzeCallStatus(message, user, thread) {
     endTime,
     status
   } = message?.callHistory;
-  console.log(status)
   switch (status) {
 
     case 7: {

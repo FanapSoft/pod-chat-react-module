@@ -1,4 +1,4 @@
-.CallBoxSceneVideo {
+.CallBoxScenePersonVideo {
   position: absolute;
   top: 0;
   left: 0;
@@ -7,60 +7,71 @@
   z-index: 2;
 }
 
-.CallBoxSceneVideo--fullScreen {
+.CallBoxScenePersonVideo--fullScreen {
   display: flex;
   align-content: center;
   justify-content: center;
 }
 
-.CallBoxSceneVideoCamContainer {
+.CallBoxScenePersonVideo__Cams {
   width: 100%;
   height: 100%;
   position: relative;
 }
 
-.CallBoxSceneVideoCamContainer--fullScreen {
+.CallBoxScenePersonVideo__Cams--fullScreen {
   max-width: 700px;
   overflow: hidden;
 }
 
-.CallBoxSceneVideoCamContainer--fullWidth {
+.CallBoxScenePersonVideo__Cams--fullWidth {
   max-width: none;
 }
 
-.CallBoxSceneVideo__SideCam {
+.CallBoxScenePersonVideo__MainCam {
   height: 100%;
   display: flex;
   justify-content: center;
   background-color: #000;
 }
 
-.CallBoxSceneVideo__SideCamVideo {
+.CallBoxScenePersonVideo__MainCamVideo {
   height: 100%;
   object-fit: cover;
 }
 
-.CallBoxSceneVideo__MyCam {
+.CallBoxScenePersonVideo__SideCams {
   padding: 0;
   position: absolute;
   bottom: 75px;
-  right: 13px;
   height: 100px;
-  width: 78px;
   overflow: hidden;
   z-index: 22;
   border-radius: 5px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
+  width: 100%;
+  margin-right: 10px;
 }
 
-.CallBoxSceneVideo__MuteContainer {
+.CallBoxScenePersonVideo__SideCam {
+  padding: 0;
+  width: 78px;
+  overflow: hidden;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  margin-left: 5px;
+  background-color: #000;
+}
+
+.CallBoxScenePersonVideo__SideCamVideo {
+  padding: 0;
+}
+
+.CallBoxScenePersonVideo__MuteContainer {
   position: absolute;
   top: 10px;
   right: 7px;
   z-index: 222;
-}
-
-.CallBoxSceneVideo__MyCamVideo {
-  padding: 0;
 }

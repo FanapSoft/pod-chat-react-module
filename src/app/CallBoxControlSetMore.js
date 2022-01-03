@@ -103,6 +103,7 @@ export default class CallBoxControlSetMore extends Component {
     });
     this.event = new CustomEvent(CALL_SETTINGS_CHANGE_EVENT, {detail: currentSettings});
     window.dispatchEvent(this.event);
+    this.onClose();
   }
 
   ringToneConfigClick() {

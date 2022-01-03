@@ -167,10 +167,10 @@ export default class CallBoxControlSet extends Component {
   }
 
   onMoreActionClick(showing, e) {
-    e && e.stopPropagation();
+    e && e.stopPropagation()
     this.setState({
-      moreSettingShow: showing
-    })
+      moreSettingShow: !this.state.moreSettingShow
+    });
   }
 
   render() {

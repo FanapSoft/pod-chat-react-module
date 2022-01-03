@@ -27,6 +27,12 @@ import {
 } from "../utils/helpers";
 import {get} from "leaflet/src/dom/DomUtil";
 
+function fixVideoTag(tag, classNames) {
+  tag.setAttribute("class", classNames);
+  tag.removeAttribute("height");
+  tag.removeAttribute("width");
+  tag.disablePictureInPicture = true;
+}
 
 @connect()
 export default class CallBoxScenePersonVideo extends Component {
@@ -35,6 +41,7 @@ export default class CallBoxScenePersonVideo extends Component {
     super(props);
     this.remoteVideoRef = React.createRef();
     this.localVideoRef = React.createRef();
+    this.remoteVideoInScreenSharingRef = React.createRef();
   }
 
   _getTags(call, user) {
@@ -42,18 +49,11 @@ export default class CallBoxScenePersonVideo extends Component {
     const isVideoCalling = isVideoCall(call);
     const isScreenSharing = isScreenShare(call);
     const isScreenSharingOwnerIsMe = isScreenSharing && isScreenShareOwnerIsMe(call?.screenShare, user);
-    const getRemoteVideoCamCondition = (isVideoCalling && isScreenSharing && isScreenSharingOwnerIsMe) || (!isScreenSharing && isVideoCalling);
-    const getLocalVideoCamCondition = (isVideoCalling && isScreenSharing && !isScreenSharingOwnerIsMe) || (!isScreenSharing && isVideoCalling);
-    const {video: remoteVideo} = getRemoteVideoCamCondition ?
-      findRemoteStreams(user, call.otherClientDtoList, uiElements)
-      :
-      isScreenSharing ? uiElements.screenShare : {};
-    const {video: localVideo} = getLocalVideoCamCondition ?
-      findLocalStreams(user, uiElements)
-      :
-      isScreenSharing && !isVideoCalling ? {} : uiElements.screenShare;
+    const {video: remoteVideo} = findRemoteStreams(user, call.otherClientDtoList, uiElements)
+    const {video: localVideo} = findLocalStreams(user, uiElements)
+    const {video: screenShareVideo} = uiElements.screenShare;
 
-    return {remoteVideo, localVideo, isScreenSharing, isScreenSharingOwnerIsMe, isVideoCalling}
+    return {remoteVideo, localVideo, screenShareVideo, isScreenSharing, isScreenSharingOwnerIsMe, isVideoCalling}
   }
 
   _injectVideos() {
@@ -63,34 +63,26 @@ export default class CallBoxScenePersonVideo extends Component {
     if (uiElements) {
       const remoteVideoTag = ReactDOM.findDOMNode(this.remoteVideoRef.current);
       const localVideoTag = ReactDOM.findDOMNode(this.localVideoRef.current);
-      const {remoteVideo, localVideo, isScreenSharing, isScreenSharingOwnerIsMe, isVideoCalling} = this._getTags(call, user);
-
-      if (remoteVideo) {
-        remoteVideo.setAttribute("class", style.CallBoxSceneVideo__SideCamVideo);
-        remoteVideo.removeAttribute("height");
-        remoteVideo.removeAttribute("width");
-        remoteVideo.disablePictureInPicture = true;
-      }
-      if (localVideo) {
-        localVideo.setAttribute("class", style.CallBoxSceneVideo__MyCamVideo);
-        localVideo.removeAttribute("height");
-        localVideo.removeAttribute("width");
-        localVideo.disablePictureInPicture = true;
-      }
-      setTimeout(function () {
-        remoteVideo && remoteVideoTag.append(remoteVideo);
-        localVideo && localVideoTag.append(localVideo);
-        if (isScreenSharing && isVideoCalling) {
-          const callDivTag = document.getElementById(CALL_DIV_ID);
-          if (isScreenSharingOwnerIsMe) {
-            const {video} = findLocalStreams(user, uiElements);
-            callDivTag.append(video);
-          } else {
-            const {video} = findRemoteStreams(user, call.otherClientDtoList, uiElements);
-            callDivTag.append(video);
-          }
+      const {
+        remoteVideo,
+        localVideo,
+        screenShareVideo,
+        isScreenSharing,
+      } = this._getTags(call, user);
+      screenShareVideo && fixVideoTag(screenShareVideo, style.CallBoxScenePersonVideo__SideCamVideo);
+      remoteVideo && fixVideoTag(remoteVideo, isScreenSharing ? style.CallBoxScenePersonVideo__SideCamVideo : style.CallBoxScenePersonVideo__MainCamVideo);
+      localVideo && fixVideoTag(localVideo, style.CallBoxScenePersonVideo__SideCamVideo);
+      if (isScreenSharing) {
+        const remoteVideoInScreenSharingRef = ReactDOM.findDOMNode(this.remoteVideoInScreenSharingRef.current);
+        screenShareVideo && remoteVideoTag.append(screenShareVideo);
+        if(isVideoCall(call)) {
+          localVideo && localVideoTag.append(localVideo);
+          remoteVideo && remoteVideoInScreenSharingRef.append(remoteVideo);
         }
-      }, 100);
+      } else {
+        localVideo && localVideoTag.append(localVideo);
+        remoteVideo && remoteVideoTag.append(remoteVideo);
+      }
     }
   }
 
@@ -126,22 +118,23 @@ export default class CallBoxScenePersonVideo extends Component {
     const {status, call} = chatCallStatus;
     const fullScreenCondition = chatCallBoxShowing.showing === CHAT_CALL_BOX_FULL_SCREEN || mobileCheck();
     const sideUserFromParticipantList = chatCallParticipantList.find(participant => user.id !== participant.id);
+    const isScreenSharing = isScreenShare(call);
 
     const classNames = classnames({
-      [style.CallBoxSceneVideo]: true,
-      [style["CallBoxSceneVideo--fullScreen"]]: fullScreenCondition
+      [style.CallBoxScenePersonVideo]: true,
+      [style["CallBoxScenePersonVideo--fullScreen"]]: fullScreenCondition
     });
 
     const callBoxSceneCamContainerClassName = classnames({
-      [style.CallBoxSceneVideoCamContainer]: true,
-      [style["CallBoxSceneVideoCamContainer--fullScreen"]]: fullScreenCondition,
-      [style["CallBoxSceneVideoCamContainer--fullWidth"]]: fullScreenCondition && (isScreenShare(call) && !isScreenShareOwnerIsMe(call?.screenShare, user)),
+      [style.CallBoxScenePersonVideo__Cams]: true,
+      [style["CallBoxScenePersonVideo__Cams--fullScreen"]]: fullScreenCondition,
+      [style["CallBoxScenePersonVideo__Cams--fullWidth"]]: fullScreenCondition && isScreenSharing
     });
 
     return <Container className={classNames}>
       <Container className={callBoxSceneCamContainerClassName}>
-        <Container className={style.CallBoxSceneVideo__SideCam} ref={this.remoteVideoRef}>
-          <Container className={style.CallBoxSceneVideo__MuteContainer}>
+        <Container className={style.CallBoxScenePersonVideo__MainCam} ref={this.remoteVideoRef}>
+          <Container className={style.CallBoxScenePersonVideo__MuteContainer}>
             {sideUserFromParticipantList && sideUserFromParticipantList.mute &&
             <MdMicOff size={style.iconSizeXs}
                       color={style.colorAccent}
@@ -149,7 +142,14 @@ export default class CallBoxScenePersonVideo extends Component {
             }
           </Container>
         </Container>
-        <Container className={style.CallBoxSceneVideo__MyCam} ref={this.localVideoRef}/>
+        {isVideoCall(call) &&
+          <Container className={style.CallBoxScenePersonVideo__SideCams}>
+            <Container className={style.CallBoxScenePersonVideo__SideCam} ref={this.localVideoRef}/>
+            {isScreenSharing &&
+            <Container className={style.CallBoxScenePersonVideo__SideCam} ref={this.remoteVideoInScreenSharingRef}/>
+            }
+          </Container>
+        }
       </Container>
     </Container>
   }

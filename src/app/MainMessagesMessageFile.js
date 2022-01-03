@@ -51,7 +51,9 @@ import MainMessagesMessageBoxSeen from "./MainMessagesMessageBoxSeen";
 import style from "../../styles/app/MainMessagesMessageFile.scss";
 import {getMomentDate} from "../utils/date";
 
-
+function createRecordingSessionFileName(message) {
+  return `call-recording-session-${getMomentDate(message.timeMiliSeconds).format("YYYY-MM-DD-HH-mm")}.mp3`;
+}
 
 @connect(store => {
   return {
@@ -144,6 +146,7 @@ class MainMessagesMessageFile extends Component {
   }
 
   buildDownloadAndPlayComponent(isJustBuild, result) {
+    const {message} = this.props;
     const downloadRef = this.downloadTriggerRef.current;
     const isDownloading = this.isDownloading;
     this.isDownloading = false;
@@ -151,7 +154,10 @@ class MainMessagesMessageFile extends Component {
       const {metaData} = this.state;
       const isPlayable = this.isPlayable;
       downloadRef.href = result;
-      downloadRef.download = (metaData.file && metaData.file.originalName) || metaData.name;
+      downloadRef.download = isCallRecordingSessionMessage(message) ?
+        createRecordingSessionFileName(message)
+        :
+        (metaData.file && metaData.file.originalName) || metaData.name;
       this.isPlayable = null;
       if (isPlayable) {
         this.playAfterDownloadTrigger(result);
@@ -343,7 +349,7 @@ class MainMessagesMessageFile extends Component {
                     :
                     <Text wordWrap="breakWord" bold>
                       {isCallRecordingSessionMessage(message) ?
-                        `call-recording-session-${getMomentDate(message.timeMiliSeconds).format("YYYY-MM-DD-HH-mm")}.mp3`
+                        createRecordingSessionFileName(message)
                         :
                         (metaData.file && metaData.file.originalName) || metaData.name}
                     </Text>
