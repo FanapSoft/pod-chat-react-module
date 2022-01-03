@@ -28,7 +28,7 @@ export default class CallBoxScenePerson extends Component {
     const {chatCallStatus, chatCallBoxShowing, user, chatCallParticipantList} = this.props;
     const {status, call} = chatCallStatus;
     const isVideoCalling = isVideoCall(call);
-    const isScreenShareResult = isScreenShare(call) && !isScreenShareOwnerIsMe(call.screenShare, user);
+    const isScreenSharing = isScreenShare(call);
     const incomingCondition = status === CHAT_CALL_STATUS_INCOMING;
     const outgoingCondition = status === CHAT_CALL_STATUS_OUTGOING;
     const commonArgs = {
@@ -37,7 +37,7 @@ export default class CallBoxScenePerson extends Component {
       user,
       chatCallParticipantList
     };
-    return (isScreenShareResult || isVideoCalling) && !incomingCondition && !outgoingCondition ?
+    return (isScreenSharing || isVideoCalling) && !incomingCondition && !outgoingCondition ?
       <CallBoxScenePersonVideo {...commonArgs}/> :
       <CallBoxScenePersonAudio {...commonArgs}/>;
   }
