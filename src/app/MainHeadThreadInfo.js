@@ -34,6 +34,7 @@ import style from "../../styles/app/MainHeadThreadInfo.scss";
 @connect(store => {
   return {
     chatState: store.chatState,
+    supportMode: store.chatSupportMode,
     chatRouterLess: store.chatRouterLess,
     threadShowing: store.threadShowing,
     participants: store.threadParticipantList.participants,
@@ -69,7 +70,7 @@ class MainHeadThreadInfo extends Component {
   }
 
   render() {
-    const {thread, smallVersion, chatState, participants, user} = this.props;
+    const {thread, smallVersion, chatState, participants, user, supportMode} = this.props;
     const {isDisconnected, isConnected} = socketStatus(chatState);
     const participant = thread.onTheFly ? thread.participant : getParticipant(participants, user);
     if (!thread.id) {
@@ -83,10 +84,12 @@ class MainHeadThreadInfo extends Component {
     const typingText = typing && typing.isTyping;
     return (
       <Container className={classNames} onClick={this.onShowInfoClick} relative>
-        <Container className={style.MainHeadThreadInfo__BackContainer} inline
-                   onClick={this.onThreadHide}>
+        {!supportMode &&
+          <Container className={style.MainHeadThreadInfo__BackContainer} inline
+                     onClick={this.onThreadHide}>
             <MdChevronRight size={style.iconSizeMd} color={style.colorWhite}/>
-        </Container>
+          </Container>
+        }
         <Avatar>
           <AvatarImage
             src={avatarUrlGenerator.apply(this, [thread.image, avatarUrlGenerator.SIZES.SMALL, getMessageMetaData(thread)])}

@@ -947,6 +947,7 @@ export default class ChatSDK {
     const callType = {
       threadId,
       type,
+      cameraPaused: false,
       ...params
     };
     this.chatAgent.startCall(callType, function (res) {
@@ -969,7 +970,7 @@ export default class ChatSDK {
   acceptCall(resolve, reject, callId) {
     this.chatAgent.acceptCall({
       callId,
-
+      cameraPaused: false,
       video: true,
       mute: false
     }, function (res) {
@@ -1110,6 +1111,27 @@ export default class ChatSDK {
       ...options
     };
     this.chatAgent.stopRecordingCall(params, function (result) {
+      resolve(result)
+    });
+  }
+
+  @promiseDecorator
+  turnOnVideoCall(resolve, reject, callId) {
+    const params = {
+      callId
+    };
+    this.chatAgent.turnOnVideoCall(params, function (result) {
+      resolve(result)
+      resolve(result)
+    });
+  }
+
+  @promiseDecorator
+  turnOffVideoCall(resolve, reject, callId) {
+    const params = {
+      callId
+    };
+    this.chatAgent.turnOffVideoCall(params, function (result) {
       resolve(result)
     });
   }

@@ -15,8 +15,9 @@ import {chatAudioPlayer} from "../actions/chatActions";
 
 //components
 import Container from "../../../pod-chat-ui-kit/src/container";
+import {Text} from "../../../pod-chat-ui-kit/src/typography";
 import {
-  MdMicOff,
+  MdMicOff, MdVideocamOff,
 } from "react-icons/md";
 import CallBoxSceneGroupParticipantsControl from "./CallBoxSceneGroupParticipantsControl";
 
@@ -25,6 +26,7 @@ import CallBoxSceneGroupParticipantsControl from "./CallBoxSceneGroupParticipant
 import style from "../../styles/app/CallBoxSceneGroupVideo.scss";
 import CallBoxSceneGroupVideoThumbnail from "./CallBoxSceneGroupVideoThumbnail";
 import {isScreenShare, isVideoCall} from "../utils/helpers";
+import strings from "../constants/localization";
 
 
 @connect(store => {
@@ -57,7 +59,7 @@ export default class CallBoxSceneGroupVideo extends Component {
     if (uiElements) {
       let videoTag = uiElements[participantId];
       if (!videoTag) {
-        return injectTo.innerHTML = `<video class="CallBoxSceneGroupVideo__CamVideo" disablepictureinpicture="" autoplay="" loop="" name="media"><source src="https://www.w3schools.com/tags/movie.mp4" type="video/mp4"></video>`;
+        return ""
       }
       videoTag = videoTag.video;
       if (!videoTag) {
@@ -78,6 +80,9 @@ export default class CallBoxSceneGroupVideo extends Component {
       const tag = document.getElementById(id);
       if (tag) {
         if (tag.firstChild) {
+          if(participant.videoMute) {
+            tag.querySelector('video') && tag.querySelector('video').remove();
+          }
         } else {
           this._injectVideo(tag, participant.id);
         }
@@ -106,7 +111,7 @@ export default class CallBoxSceneGroupVideo extends Component {
     const {call} = this.props.chatCallStatus;
     const {uiElements} = call;
     if (uiElements) {
-      for(const element of Object.keys(uiElements)) {
+      for (const element of Object.keys(uiElements)) {
         const callDivTag = document.getElementById(CALL_DIV_ID);
         callDivTag.append(uiElements[element].video);
       }
@@ -224,8 +229,18 @@ export default class CallBoxSceneGroupVideo extends Component {
                           color={style.colorAccent}
                           style={{margin: "3px 4px"}}/>
                 }
+                {participant && participant.videoMute &&
+                <MdVideocamOff size={style.iconSizeXs}
+                               color={style.colorAccent}
+                               style={{margin: "3px 4px"}}/>
+                }
               </Container>
               <Container id={`video-${participant.id}`} className={style.CallBoxSceneGroupVideo__CamVideoContainer}/>
+              {participant && participant.videoMute &&
+              <Container center>
+                <Text invert size="xs">{strings.userMutedTheVideo}</Text>
+              </Container>
+              }
             </Container>
           )}
         </Container> :

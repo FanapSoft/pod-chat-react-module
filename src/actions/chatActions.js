@@ -204,6 +204,9 @@ export const chatSetInstance = config => {
           case "CALL_PARTICIPANT_MUTE":
           case "CALL_PARTICIPANT_UNMUTE":
             return dispatch(chatCallParticipantListChange(callParticipantStandardization(call)));
+          case "TURN_OFF_VIDEO_CALL":
+          case "TURN_ON_VIDEO_CALL":
+            return dispatch(chatCallParticipantListChange(callParticipantStandardization(call, {videoMute: type === "TURN_OFF_VIDEO_CALL"})));
           case "RECEIVE_CALL":
             dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, call.conversationVO || {}, call.creatorVO));
             return dispatch(chatCallStatus(CHAT_CALL_STATUS_INCOMING, call));
@@ -658,6 +661,26 @@ export const chatCallEndScreenShare = () => {
   }
 };
 
+export const chatCallTurnOnVideo = callId => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const chatSDK = state.chatInstance.chatSDK;
+    if (state.chatCallStatus.call) {
+      chatSDK.turnOnVideoCall(state.chatCallStatus.call.callId);
+    }
+  }
+};
+
+export const chatCallTurnOffVideo = () => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const chatSDK = state.chatInstance.chatSDK;
+    if (state.chatCallStatus.call) {
+      chatSDK.turnOffVideoCall(state.chatCallStatus.call.callId);
+    }
+  }
+};
+
 export const chatStartCallRecording = () => {
   return (dispatch, getState) => {
     const state = getState();
@@ -677,7 +700,6 @@ export const chatStopCallRecording = () => {
     }
   }
 };
-
 
 
 export const chatCallGroupVideoViewMode = type => {

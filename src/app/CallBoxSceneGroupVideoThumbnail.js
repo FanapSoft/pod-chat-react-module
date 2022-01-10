@@ -22,13 +22,14 @@ import {Text} from "../../../pod-chat-ui-kit/src/typography";
 import {
   MdMicOff,
   MdPlayArrow,
-  MdPause
+  MdPause, MdVideocamOff
 } from "react-icons/md";
 import Avatar, {AvatarImage, AvatarName} from "../../../pod-chat-ui-kit/src/avatar";
 import AvatarText from "../../../pod-chat-ui-kit/src/avatar/AvatarText";
 
 //styling
 import style from "../../styles/app/CallBoxSceneGroupVideoThumbnail.scss";
+import strings from "../constants/localization";
 
 
 @connect(store => {
@@ -118,6 +119,7 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
       isVideoCall
     } = this.props;
     let {sceneParticipant} = this.state;
+
     const fullScreenCondition = chatCallBoxShowing.showing === CHAT_CALL_BOX_FULL_SCREEN;
     sceneParticipant = sceneParticipant || participant;
     sceneParticipant = sceneParticipant && sceneParticipant.id ? sceneParticipant : chatCallParticipantList.find(partcipant => partcipant.id === sceneParticipant);
@@ -133,6 +135,7 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
     if (!sceneParticipant) {
       sceneParticipant = {};
     }
+    sceneParticipant = chatCallParticipantList.find(participant => participant.id === sceneParticipant.id);
     const classNames = classnames({
       [style.CallBoxSceneGroupVideoThumbnail]: true,
     });
@@ -149,8 +152,25 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
 
     return <Container className={classNames}>
       <Container className={sceneClassNames}>
+        <Container className={style.CallBoxSceneGroupVideoThumbnail__MuteContainer}>
+          {sceneParticipant && sceneParticipant.mute &&
+          <MdMicOff size={style.iconSizeXs}
+                    color={style.colorAccent}
+                    style={{margin: "3px 4px"}}/>
+          }
+          {sceneParticipant && sceneParticipant.videoMute &&
+          <MdVideocamOff size={style.iconSizeXs}
+                         color={style.colorAccent}
+                         style={{margin: "3px 4px"}}/>
+          }
+        </Container>
         <Container id={isScreenShare ? "video-screenShare" : `video-${sceneParticipant.id}`}
                    className={style.CallBoxSceneGroupVideoThumbnail__CamVideoContainer}/>
+        {sceneParticipant && sceneParticipant.videoMute &&
+        <Container center>
+          <Text invert size="xs">{strings.userMutedTheVideo}</Text>
+        </Container>
+        }
       </Container>
       {isVideoCall &&
       <Container className={listClassNames}>
@@ -166,9 +186,15 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
                             color={style.colorAccent}
                             style={{margin: "3px 4px"}}/>
                   }
+                  {participant && participant.videoMute &&
+                  <MdVideocamOff size={style.iconSizeXs}
+                                 color={style.colorAccent}
+                                 style={{margin: "3px 4px"}}/>
+                  }
                 </Container>
                 <Container id={`video-${participant.id}`}
                            className={style.CallBoxSceneGroupVideoThumbnail__CamVideoContainer}/>
+
               </Container>
             )}
           </Container>

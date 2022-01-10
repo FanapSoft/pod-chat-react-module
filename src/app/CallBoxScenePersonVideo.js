@@ -12,8 +12,10 @@ import {
 
 //components
 import Container from "../../../pod-chat-ui-kit/src/container";
+import {Text} from "../../../pod-chat-ui-kit/src/typography";
 import {
-  MdMicOff
+  MdMicOff,
+  MdVideocamOff
 } from "react-icons/md";
 
 //styling
@@ -26,12 +28,21 @@ import {
   mobileCheck
 } from "../utils/helpers";
 import {get} from "leaflet/src/dom/DomUtil";
+import strings from "../constants/localization";
 
 function fixVideoTag(tag, classNames) {
   tag.setAttribute("class", classNames);
   tag.removeAttribute("height");
   tag.removeAttribute("width");
   tag.disablePictureInPicture = true;
+}
+
+function fixInjectVideoTag(tag, parent) {
+  if (!tag || !parent) {
+    return;
+  }
+  parent.querySelector('video') && parent.querySelector('video').remove();
+  parent.append(tag);
 }
 
 @connect()
@@ -74,14 +85,14 @@ export default class CallBoxScenePersonVideo extends Component {
       localVideo && fixVideoTag(localVideo, style.CallBoxScenePersonVideo__SideCamVideo);
       if (isScreenSharing) {
         const remoteVideoInScreenSharingRef = ReactDOM.findDOMNode(this.remoteVideoInScreenSharingRef.current);
-        screenShareVideo && remoteVideoTag.append(screenShareVideo);
-        if(isVideoCall(call)) {
-          localVideo && localVideoTag.append(localVideo);
-          remoteVideo && remoteVideoInScreenSharingRef.append(remoteVideo);
+        fixInjectVideoTag(screenShareVideo, remoteVideoTag);
+        if (isVideoCall(call)) {
+          fixInjectVideoTag(localVideo, localVideoTag)
+          fixInjectVideoTag(remoteVideo, remoteVideoInScreenSharingRef)
         }
       } else {
-        localVideo && localVideoTag.append(localVideo);
-        remoteVideo && remoteVideoTag.append(remoteVideo);
+        fixInjectVideoTag(localVideo, localVideoTag);
+        fixInjectVideoTag(remoteVideo, remoteVideoTag);
       }
     }
   }
@@ -140,15 +151,26 @@ export default class CallBoxScenePersonVideo extends Component {
                       color={style.colorAccent}
                       style={{margin: "3px 4px"}}/>
             }
+            {sideUserFromParticipantList && sideUserFromParticipantList.videoMute &&
+            <MdVideocamOff size={style.iconSizeXs}
+                           color={style.colorAccent}
+                           style={{margin: "3px 4px"}}/>
+            }
+
           </Container>
+          {sideUserFromParticipantList && sideUserFromParticipantList.videoMute &&
+          <Container center>
+            <Text invert size="xs">{strings.userMutedTheVideo}</Text>
+          </Container>
+          }
         </Container>
         {isVideoCall(call) &&
-          <Container className={style.CallBoxScenePersonVideo__SideCams}>
-            <Container className={style.CallBoxScenePersonVideo__SideCam} ref={this.localVideoRef}/>
-            {isScreenSharing &&
-            <Container className={style.CallBoxScenePersonVideo__SideCam} ref={this.remoteVideoInScreenSharingRef}/>
-            }
-          </Container>
+        <Container className={style.CallBoxScenePersonVideo__SideCams}>
+          <Container className={style.CallBoxScenePersonVideo__SideCam} ref={this.localVideoRef}/>
+          {isScreenSharing &&
+          <Container className={style.CallBoxScenePersonVideo__SideCam} ref={this.remoteVideoInScreenSharingRef}/>
+          }
+        </Container>
         }
       </Container>
     </Container>

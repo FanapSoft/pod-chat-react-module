@@ -787,13 +787,14 @@ export function emailify(text) {
   });
 }
 
-export function callParticipantStandardization(arrayOfParticipants) {
+export function callParticipantStandardization(arrayOfParticipants, params = {}) {
   return arrayOfParticipants.map(participant => {
     const {participantVO} = participant;
     delete participant.participantVO;
     return {
       ...participantVO,
-      ...participant
+      ...participant,
+      ...params
     }
   })
 }
@@ -911,14 +912,14 @@ export function analyzeCallStatus(message, user, thread) {
       }
     }
     case 6: {
-        return {
-          Icon() {
-            return <MdPhoneInTalk color={style.colorGreenTick} size={style.iconSizeSm} style={{marginLeft: "5px"}}/>;
-          },
-          Text() {
-            return strings.callStartedAt(messageDatePetrification(startTime, true));
-          }
-        };
+      return {
+        Icon() {
+          return <MdPhoneInTalk color={style.colorGreenTick} size={style.iconSizeSm} style={{marginLeft: "5px"}}/>;
+        },
+        Text() {
+          return strings.callStartedAt(messageDatePetrification(startTime, true));
+        }
+      };
     }
     default: {
       return;

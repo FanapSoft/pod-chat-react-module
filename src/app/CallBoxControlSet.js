@@ -7,7 +7,7 @@ import {
   chatAcceptCall,
   chatAudioPlayer,
   chatCallBoxShowing, chatCallMuteParticipants,
-  chatCallStatus, chatCallUnMuteParticipants,
+  chatCallStatus, chatCallTurnOffVideo, chatCallTurnOnVideo, chatCallUnMuteParticipants,
   chatRejectCall
 } from "../actions/chatActions";
 
@@ -26,7 +26,7 @@ import {
   MdMoreHoriz,
   MdOutlineScreenShare,
   MdViewCarousel,
-  MdPause
+  MdPause, MdVideocamOff
 } from "react-icons/md";
 
 //styling
@@ -61,10 +61,12 @@ export default class CallBoxControlSet extends Component {
     this.onAcceptCallClick = this.onAcceptCallClick.bind(this);
     this.onVolumeClick = this.onVolumeClick.bind(this);
     this.onMicClick = this.onMicClick.bind(this);
+    this.onCamClick = this.onCamClick.bind(this);
     this.onMoreActionClick = this.onMoreActionClick.bind(this);
     this.state = {
       volume: true,
       mic: true,
+      cam: true,
       moreSettingShow: false
     }
   }
@@ -166,6 +168,21 @@ export default class CallBoxControlSet extends Component {
     })
   }
 
+  onCamClick(e) {
+    e.stopPropagation();
+    const currentState = this.state.cam;
+    const nextState = !currentState;
+    const {chatCallStatus, user, dispatch} = this.props;
+    if (nextState) {
+      dispatch(chatCallTurnOnVideo());
+    } else {
+      dispatch(chatCallTurnOffVideo());
+    }
+    this.setState({
+      cam: nextState,
+    })
+  }
+
   onMoreActionClick(showing, e) {
     e && e.stopPropagation()
     this.setState({
@@ -175,7 +192,7 @@ export default class CallBoxControlSet extends Component {
 
   render() {
     const {chatCallStatus, buttonSize, chatCallBoxShowing, user} = this.props;
-    const {mic, volume, moreSettingShow} = this.state;
+    const {mic, volume, moreSettingShow, cam} = this.state;
     const {status, call} = chatCallStatus;
     const {showing: callBoxShowingType} = chatCallBoxShowing;
     const showScreenShareIconCondition = isScreenShare(call) && isScreenShareOwnerIsMe(call?.screenShare, user);
@@ -220,14 +237,28 @@ export default class CallBoxControlSet extends Component {
       </ButtonFloating>
       }
       {!incomingCondition &&
-      <ButtonFloating onClick={this.onMicClick} size={buttonSize || "sm"} className={micOffOrOnClassNames}>
+      <>
+        {
+          isVideoCall(call) &&
+          <ButtonFloating onClick={this.onCamClick} size={buttonSize || "sm"} className={micOffOrOnClassNames}>
 
-        {mic ?
-          <MdMic size={style.iconSizeMd} style={{margin: "7px 5px"}}/> :
-          <MdMicOff size={style.iconSizeMd} style={{margin: "7px 5px"}}/>
+            {cam ?
+              <MdVideocam size={style.iconSizeMd} style={{margin: "7px 5px"}}/> :
+              <MdVideocamOff size={style.iconSizeMd} style={{margin: "7px 5px"}}/>
+            }
+          </ButtonFloating>
         }
-      </ButtonFloating>
+        <ButtonFloating onClick={this.onMicClick} size={buttonSize || "sm"} className={micOffOrOnClassNames}>
+
+          {mic ?
+            <MdMic size={style.iconSizeMd} style={{margin: "7px 5px"}}/> :
+            <MdMicOff size={style.iconSizeMd} style={{margin: "7px 5px"}}/>
+          }
+        </ButtonFloating>
+
+      </>
       }
+
 
       <ButtonFloating onClick={this.onVolumeClick} size={buttonSize || "sm"} className={speakerOnOrOffClassNames}>
 
