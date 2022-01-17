@@ -27,6 +27,7 @@ import {
   MdViewQuilt,
   MdFeaturedVideo,
   MdViewCarousel,
+  MdFiberManualRecord,
   MdPause
 } from "react-icons/md";
 
@@ -186,15 +187,14 @@ export default class CallBoxControlSetMore extends Component {
             <Container className={settingItemClassNames}>
 
               <Container className={style.CallBoxControlSetMore__SettingItemText}>
-                <MdOutlineScreenShare size={style.iconSizeMd} color={style.colorGrayDark}/>
+                <MdOutlineScreenShare size={style.iconSizeMd} color={isScreenSharingOwnerIsMeResult ? style.colorAccent : style.colorGrayDark}/>
                 <Gap x={20}>
                   <Text color={!enableRecordingAndScreenSharingFeature && "gray"}>{strings.shareScreen}</Text>
                 </Gap>
               </Container>
 
               <Container className={style.CallBoxControlSetMore__SettingItemStatus}>
-                <Text size="sm"
-                      color={isScreenSharingOwnerIsMeResult ? "green" : "red"}>{isScreenSharingOwnerIsMeResult ? strings.active : strings.inActive}</Text>
+                {isScreenSharingOwnerIsMeResult && <MdFiberManualRecord className={style.CallBoxControlSetMore__Recording}/>}
               </Container>
 
             </Container>
@@ -206,15 +206,14 @@ export default class CallBoxControlSetMore extends Component {
             <Container className={settingItemClassNames}>
 
               <Container className={style.CallBoxControlSetMore__SettingItemText}>
-                <MdMic size={style.iconSizeMd} color={style.colorGrayDark}/>
+                <MdMic size={style.iconSizeMd} color={isCallRecordingByMe ? style.colorAccent : style.colorGrayDark}/>
                 <Gap x={20}>
                   <Text color={(!enableCallRecordingFeature) && "gray"}>{strings.recordCallSession}</Text>
                 </Gap>
               </Container>
 
               <Container className={style.CallBoxControlSetMore__SettingItemStatus}>
-                <Text size="sm"
-                      color={isCallRecordingByMe ? "green" : "red"}>{ isCallRecordingByMe ? strings.active : strings.inActive}</Text>
+                {isCallRecordingByMe && <MdFiberManualRecord className={style.CallBoxControlSetMore__Recording}/>}
               </Container>
 
             </Container>
@@ -225,7 +224,7 @@ export default class CallBoxControlSetMore extends Component {
             <Container className={settingItemClassNames}>
 
               <Container className={style.CallBoxControlSetMore__SettingItemText}>
-                <MdRingVolume size={style.iconSizeMd} color={style.colorGrayDark}/>
+                <MdRingVolume size={style.iconSizeMd} color={ringToneSound ? style.colorAccent : style.colorGrayDark}/>
                 <Gap x={20}>
                   <Text>{strings.ringToneSound}</Text>
                 </Gap>
@@ -243,7 +242,7 @@ export default class CallBoxControlSetMore extends Component {
             <Container className={settingItemClassNames}>
 
               <Container className={style.CallBoxControlSetMore__SettingItemText}>
-                <MdVolumeUp size={style.iconSizeMd} color={style.colorGrayDark}/>
+                <MdVolumeUp size={style.iconSizeMd} color={callToneSound ? style.colorAccent : style.colorGrayDark}/>
                 <Gap x={20}>
                   <Text>{strings.callToneSound}</Text>
                 </Gap>

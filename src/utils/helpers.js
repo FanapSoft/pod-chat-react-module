@@ -296,7 +296,14 @@ export function isSystemMessage(message) {
 }
 
 export function isCallRecordingSessionMessage(message) {
-  return message.messageType === 11;
+  const metaData = getMessageMetaData(message);
+  if (!metaData) {
+    return false;
+  }
+  if ((metaData.file && metaData.file.originalName) || metaData.name) {
+    return false;
+  }
+  return true;
 }
 
 

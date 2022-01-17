@@ -1,14 +1,37 @@
 .CallBoxControlSetMore__SettingItemContainer {
   display: inline-flex;
   width: 100%;
+  align-items: center;
 }
 
 .CallBoxControlSetMore__SettingItemText {
   display: inline-flex;
   flex-grow: 1;
-
 }
 
 .CallBoxControlSetMore__SettingItemStatus {
   flex: none;
+}
+
+.CallBoxControlSetMore__Recording {
+  color: $color-red;
+  animation-duration: 1s;
+  animation-name: fader;
+  animation-iteration-count: infinite;
+  height: $icon-size-sm;
+  width: $icon-size-sm;
+}
+
+@keyframes fader {
+  from {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
 }

@@ -59,12 +59,10 @@ export default class CallBoxControlSet extends Component {
     super(props);
     this.onDropCallClick = this.onDropCallClick.bind(this);
     this.onAcceptCallClick = this.onAcceptCallClick.bind(this);
-    this.onVolumeClick = this.onVolumeClick.bind(this);
     this.onMicClick = this.onMicClick.bind(this);
     this.onCamClick = this.onCamClick.bind(this);
     this.onMoreActionClick = this.onMoreActionClick.bind(this);
     this.state = {
-      volume: true,
       mic: true,
       cam: true,
       moreSettingShow: false
@@ -138,20 +136,6 @@ export default class CallBoxControlSet extends Component {
     stopRingtone(status);
   }
 
-  onVolumeClick(e) {
-    e.stopPropagation();
-    const currentState = this.state.volume;
-    const nextState = !currentState;
-    const {chatCallStatus} = this.props;
-    const {call, status} = chatCallStatus;
-    const {uiRemoteAudio} = call;
-    if (uiRemoteAudio) {
-      uiRemoteAudio.muted = !nextState;
-    }
-    this.setState({
-      volume: nextState,
-    })
-  }
 
   onMicClick(e) {
     e.stopPropagation();
@@ -258,16 +242,6 @@ export default class CallBoxControlSet extends Component {
 
       </>
       }
-
-
-      <ButtonFloating onClick={this.onVolumeClick} size={buttonSize || "sm"} className={speakerOnOrOffClassNames}>
-
-        {volume ?
-          <MdVolumeUp size={style.iconSizeMd} style={{margin: "7px 5px"}}/> :
-          <MdVolumeOff size={style.iconSizeMd} style={{margin: "7px 5px"}}/>
-        }
-
-      </ButtonFloating>
 
       {!incomingCondition && callBoxShowingType !== CHAT_CALL_BOX_COMPACTED &&
       <Fragment>
