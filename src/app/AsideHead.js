@@ -15,22 +15,29 @@ import {ROUTE_ADD_CONTACT, ROUTE_CONTACTS, ROUTE_CREATE_CHANNEL, ROUTE_CREATE_GR
 
 //actions
 import {contactAdding, contactListShowing, contactModalCreateGroupShowing} from "../actions/contactActions";
-import {chatSearchShow} from "../actions/chatActions";
+import {
+  chatCallBoxShowing,
+  chatCallGetParticipantList,
+  chatSearchShow,
+  chatSelectParticipantForCallShowing, chatStartGroupCall
+} from "../actions/chatActions";
 
 //UI components
+import MakeGlobalCall from "./_component/MakeGlobalCall";
 import Dropdown, {DropdownItem} from "../../../pod-chat-ui-kit/src/menu/Dropdown";
-import {ButtonFloating} from "../../../pod-chat-ui-kit/src/button"
+import {ButtonFloating, Button} from "../../../pod-chat-ui-kit/src/button"
 import Container from "../../../pod-chat-ui-kit/src/container";
 import {Text} from "../../../pod-chat-ui-kit/src/typography";
 import Loading, {LoadingBlinkDots} from "../../../pod-chat-ui-kit/src/loading";
 import Avatar, {AvatarImage, AvatarName} from "../../../pod-chat-ui-kit/src/avatar";
 import Gap from "../../../pod-chat-ui-kit/src/gap";
-import {MdMenu, MdClose, MdSearch, MdEdit, MdArrowBack} from "react-icons/md";
+import {MdMenu, MdClose, MdSearch, MdEdit, MdArrowBack, MdPhone, MdPermPhoneMsg, MdContactPhone} from "react-icons/md";
 import Notification from "./Notification";
 
 //styling
 import style from "../../styles/app/AsidHead.scss";
 import utilsStlye from "../../styles/utils/utils.scss";
+import {CHAT_CALL_BOX_NORMAL, MAX_GROUP_CALL_COUNT} from "../constants/callModes";
 
 const statics = {
   headMenuSize: 59
@@ -87,7 +94,8 @@ class AsideHead extends Component {
     this.onOpenMenu = this.onOpenMenu.bind(this);
     this.onRetryClick = this.onRetryClick.bind(this);
     this.onChatSearchToggle = this.onChatSearchToggle.bind(this);
-    OnWindowFocusInOut(e=>{}, e => {
+    OnWindowFocusInOut(e => {
+    }, e => {
       const {isDisconnected} = socketStatus(this.props.chatState);
       if (isDisconnected) {
         if (!this.state.reConnecting) {
@@ -110,7 +118,10 @@ class AsideHead extends Component {
     }
     if (chatState) {
       const {isDisconnected, timeUntilReconnect, isReconnecting} = socketStatus(chatState);
-      const {isDisconnected: oldIsDisconnected, timeUntilReconnect: oldTimeUntilReconnect} = socketStatus(prevProps.chatState);
+      const {
+        isDisconnected: oldIsDisconnected,
+        timeUntilReconnect: oldTimeUntilReconnect
+      } = socketStatus(prevProps.chatState);
 
       if (isReconnecting) {
         clearInterval(this.timeRemainingToConnectIntervalId);
@@ -247,13 +258,13 @@ class AsideHead extends Component {
           }
 
         </Container>
-
         <Dropdown isOpen={isOpen} container={this.container} onClose={this.onCloseMenu}>
           <Container relative className={style.AsideHead__UserProfileContainer}>
             <Gap block x={20} y={20}>
               <Container topLeft>
                 <Gap x={10} y={15} block>
-                  <MdArrowBack size={style.iconSizeMd} color={style.colorBackgroundLight} style={{margin: "7px 0"}} onClick={this.onCloseMenu}/>
+                  <MdArrowBack size={style.iconSizeMd} color={style.colorBackgroundLight} style={{margin: "7px 0"}}
+                               onClick={this.onCloseMenu}/>
                 </Gap>
               </Container>
               <Avatar>
@@ -277,7 +288,8 @@ class AsideHead extends Component {
                   backgroundColor: style.colorAccentLight,
                   boxShadow: "none",
                   left: 5,
-                  bottom: 5}}>
+                  bottom: 5
+                }}>
                   <MdEdit size={style.iconSizeMd} style={{margin: "7px 5px"}}/>
                 </ButtonFloating>
               </Text>
@@ -288,7 +300,11 @@ class AsideHead extends Component {
           ))}
         </Dropdown>
         <Container centerLeft>
-          <Container inline cursor="pointer" className={style.AsideHead__SearchContainer} onClick={this.onChatSearchToggle}>
+          <Container inline cursor="pointer" className={style.AsideHead__MakeCallContainer}>
+            <MakeGlobalCall/>
+          </Container>
+          <Container inline cursor="pointer" className={style.AsideHead__SearchContainer}
+                     onClick={this.onChatSearchToggle}>
             {chatSearchShowing ?
               <MdClose size={style.iconSizeMd} color={style.colorWhite}/>
               :

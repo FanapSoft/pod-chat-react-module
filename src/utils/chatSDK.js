@@ -956,14 +956,16 @@ export default class ChatSDK {
   }
 
   @promiseDecorator
-  startGroupCall(resolve, reject, threadId, invitees, type, params = {}) {
+  startGroupCall(resolve, reject, threadId, invitees, type, params = {}, callBack) {
     const callParams = {
       threadId,
       invitees,
       type,
       ...params
     };
-    chatAgent.startGroupCall(callParams);
+    chatAgent.startGroupCall(callParams, e => {
+      callBack && callBack(e.result);
+    });
   }
 
   @promiseDecorator
@@ -1047,16 +1049,16 @@ export default class ChatSDK {
     this.chatAgent.removeCallParticipants(params, function (result) {
       resolve(result)
     });
-  }  
-  
+  }
+
   @promiseDecorator
-  addCallParticipants (resolve, reject, callId, usernames) {
+  addCallParticipants(resolve, reject, callId, contactIds) {
     const params = {
       callId,
-      usernames
+      contactIds
     };
     this.chatAgent.addCallParticipants(params, function (result) {
-      resolve(result)
+      resolve(result);
     });
   }
 

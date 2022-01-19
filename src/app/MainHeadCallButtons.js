@@ -28,6 +28,7 @@ import {
   MAX_GROUP_CALL_COUNT
 } from "../constants/callModes";
 import {getParticipant} from "./ModalThreadInfoPerson";
+import MakeGlobalCall from "./_component/MakeGlobalCall";
 
 @connect(store => {
   return {
@@ -42,62 +43,15 @@ export default class MainHeadCallButtons extends Component {
     super(props);
     this.onVoiceCallClick = this.onVoiceCallClick.bind(this);
     this.onVideoCallClick = this.onVideoCallClick.bind(this);
-    this._selectParticipantForCallFooterFragment = this._selectParticipantForCallFooterFragment.bind(this);
+    this.makeGlobalCallRef = React.createRef();
   }
 
-  _selectParticipantForCallFooterFragment(mode, {selectedContacts, allContacts}) {
-    const {thread, dispatch, user} = this.props;
-    const isMaximumCount = (selectedContacts && selectedContacts.length > MAX_GROUP_CALL_COUNT - 1);
-    return <Container>
-      <Container>
-        {(selectedContacts && selectedContacts.length >= 1) &&
-        <Button disabled={isMaximumCount} color={isMaximumCount ? "gray" : "accent"} onClick={e => {
-          if (isMaximumCount) {
-            return;
-          }
-          dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, thread));
-          dispatch(chatSelectParticipantForCallShowing(false));
-          const selectedParticipants = allContacts.filter(e => selectedContacts.indexOf(e.id) > -1);
-          selectedParticipants.find(e => e.id === user.id) ? null : selectedParticipants.push(user);
-          dispatch(chatCallGetParticipantList(null, selectedParticipants));
-          const invitess = selectedParticipants.map(e => {
-            return mode === "CONTACT" ?
-              {id: e.id, type: "TO_BE_USER_CONTACT_ID"}
-              :
-              {
-                id: e.id,
-                type: "TO_BE_USER_USER_ID"
-              };
-          });
-          dispatch(chatStartGroupCall(null, invitess, this._lastGroupCallRequest));
-        }}>{strings.call}</Button>
-        }
-
-        <Button text onClick={() => dispatch(chatSelectParticipantForCallShowing(false))}>{strings.cancel}</Button>
-      </Container>
-      <Container>
-        {
-          isMaximumCount &&
-          <Text color="accent">{strings.maximumNumberOfContactSelected}</Text>
-        }
-      </Container>
-    </Container>
-  }
 
   _groupCall(type) {
     const {participants, thread, user, dispatch} = this.props;
     if (thread.participantCount > MAX_GROUP_CALL_COUNT) {
-      return dispatch(chatSelectParticipantForCallShowing({
-          showing: true,
-          selectiveMode: true,
-          headingTitle: strings.forCallPleaseSelectContacts,
-          thread,
-          FooterFragment: this._selectParticipantForCallFooterFragment,
-          dualMode: true
-        },
-      ));
+      return this.makeGlobalCallRef.current.onMakeCall(this._lastGroupCallRequest);
     }
-
     dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, thread));
     dispatch(chatCallGetParticipantList(null, participants));
     dispatch(chatStartGroupCall(thread.id, null, type));
@@ -138,7 +92,6 @@ export default class MainHeadCallButtons extends Component {
       return this._groupCall("video");
     }
     this._p2pCall("video");
-
   }
 
   render() {
@@ -149,6 +102,7 @@ export default class MainHeadCallButtons extends Component {
     });
     return (
       <Container inline>
+        <MakeGlobalCall noRender ref={this.makeGlobalCallRef} dualMode thread={thread}/>
         <Container className={classNames} onClick={chatCallStatus.status ? e => {
         } : this.onVoiceCallClick}>
           <MdPhone size={style.iconSizeMd}

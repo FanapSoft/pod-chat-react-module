@@ -30,15 +30,7 @@ import List from "../../../pod-chat-ui-kit/src/List";
 
 //styling
 import style from "../../styles/app/CallBoxSceneGroupParticipantsControl.scss";
-import {avatarNameGenerator, avatarUrlGenerator, getMessageMetaData} from "../utils/helpers";
-import {
-  CHAT_CALL_BOX_NORMAL,
-  CHAT_CALL_STATUS_INCOMING,
-  CHAT_CALL_STATUS_OUTGOING,
-  CHAT_CALL_STATUS_STARTED, MAX_GROUP_CALL_COUNT,
-  MOCK_CONTACT,
-  MOCK_USER
-} from "../constants/callModes";
+import {CHAT_CALL_STATUS_STARTED, MAX_GROUP_CALL_COUNT,} from "../constants/callModes";
 import {ContactListItem, getImage, getName} from "./_component/contactList";
 import classnames from "classnames";
 import Gap from "raduikit/src/gap";
@@ -83,9 +75,10 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
     dispatch(chatCallGroupSettingsShowing(false));
   }
 
-  _selectParticipantForCallFooterFragment({selectedContacts, allContacts}) {
-    const {dispatch, user, chatCallParticipantList, chatCallStatus} = this.props;
-    const isMaximumCount = (selectedContacts && (selectedContacts.length + chatCallParticipantList.length) >= MAX_GROUP_CALL_COUNT);
+  _selectParticipantForCallFooterFragment(mode, {selectedContacts, allContacts}) {
+    const {dispatch, chatCallBoxShowing, chatCallStatus} = this.props;
+    const {thread} = chatCallBoxShowing;
+    const isMaximumCount = thread.participantCount + selectedContacts.length > MAX_GROUP_CALL_COUNT;
     return <Container>
       <Container>
         {(selectedContacts && selectedContacts.length >= 1) &&
@@ -93,13 +86,9 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
           if (isMaximumCount) {
             return;
           }
+          const selectedParticipants = allContacts.filter(e => selectedContacts.indexOf(e.id) > -1).map(e => ({...e, id: e.userId}))
           dispatch(chatSelectParticipantForCallShowing(false));
-          const selectedParticipants = allContacts.filter(e => selectedContacts.indexOf(e.id) > -1);
-          selectedParticipants.find(e => e.id === user.id) ? null : selectedParticipants.push(user);
-          const usernames = selectedParticipants.map(e => {
-            return e.username;
-          });
-          dispatch(chatCallAddParticipants(chatCallStatus.call.callId, usernames, selectedParticipants));
+          dispatch(chatCallAddParticipants(chatCallStatus.call.callId, selectedContacts, selectedParticipants));
         }}>{strings.add}</Button>
         }
         <Button text onClick={() => dispatch(chatSelectParticipantForCallShowing(false))}>{strings.cancel}</Button>
@@ -147,7 +136,7 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
               </Text>
             </Container>
 
-            {(isCallOwner && chatCallParticipantList.length < MAX_GROUP_CALL_COUNT) &&
+            {(isCallOwner && thread.participantCount < MAX_GROUP_CALL_COUNT) &&
             <Container cursor="pointer">
 
               <MdAdd onClick={this.onAddMember}
@@ -187,10 +176,10 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
                                      {status === CHAT_CALL_STATUS_STARTED &&
                                      <Container
                                        style={{
-                                         margin: "3px 0",
-                                         cursor: muteUnmutePermissionCondition ? "pointer" : "default"
-                                       }}
-                                       onClick={muteUnmutePermissionCondition && this.onParticipantMuteClick.bind(this, contact)}>
+                                         margin: "3px 0"/*,
+                                         cursor: muteUnmutePermissionCondition ? "pointer" : "default"*/
+                                       }}/*
+                                       onClick={muteUnmutePermissionCondition && this.onParticipantMuteClick.bind(this, contact)}*/>
                                        {contact.mute ?
                                          <MdMicOff size={style.iconSizeSm}
                                                    color={style.colorGrayDark}
@@ -205,7 +194,7 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
                                                 }}/>}
                                      </Container>
                                      }
-                                     {isCallOwner &&
+{/*                                     {isCallOwner &&
                                      <Container
                                        style={{margin: "3px 0", cursor: "pointer"}}
                                        color={style.colorRedDark}
@@ -216,7 +205,7 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
                                                     margin: "3px 4px"
                                                   }}/>
                                      </Container>
-                                     }
+                                     }*/}
                                    </Container>
 
                                  }

@@ -520,18 +520,15 @@ export const chatCallRemoveParticipants = (callId, userIds) => {
   }
 };
 
-export const chatCallAddParticipants = (callId, usernames, participants) => {
+export const chatCallAddParticipants = (callId, contactIds, participants) => {
   return (dispatch, getState) => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
-    if (participants) {
-      chatSDK.addCallParticipants(callId, usernames).then(e => {
-        dispatch({
-          type: CHAT_CALL_PARTICIPANT_JOINED,
-          payload: participants
-        });
-      });
-    }
+    chatSDK.addCallParticipants(callId, contactIds);
+    dispatch({
+      type: CHAT_CALL_PARTICIPANT_JOINED,
+      payload: participants
+    });
   }
 };
 
@@ -632,11 +629,11 @@ export const chatSelectParticipantForCallShowing = data => {
   }
 };
 
-export const chatStartGroupCall = (threadId, invitees, type, params) => {
+export const chatStartGroupCall = (threadId, invitees, type, params, callBack) => {
   return (dispatch, getState) => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
-    chatSDK.startGroupCall(threadId, invitees, type, params);
+    chatSDK.startGroupCall(threadId, invitees, type, params, callBack);
     dispatch(chatCallStatus(CHAT_CALL_STATUS_OUTGOING, {type: type === "video" ? 1 : 0}));
   }
 };

@@ -28,7 +28,7 @@ import {
   CHAT_CALL_PARTICIPANT_LIST_PRELOAD,
   CHAT_CALL_PARTICIPANT_REMOVED,
   CHAT_CALL_PARTICIPANT_LEFT,
-  CHAT_CALL_PARTICIPANT_JOINED, CHAT_CALL_GROUP_SETTINGS_SHOWING, CHAT_CALL_GROUP_VIDEO_VIEW_MODE
+  CHAT_CALL_PARTICIPANT_JOINED, CHAT_CALL_GROUP_SETTINGS_SHOWING, CHAT_CALL_GROUP_VIDEO_VIEW_MODE, THREAD_CHANGED
 } from "../constants/actionTypes";
 import {listUpdateStrategyMethods, stateGenerator, stateGeneratorState, updateStore} from "../utils/storeHelper";
 import {CHAT_CALL_BOX_NORMAL, CHAT_CALL_STATUS_INCOMING, CHAT_CALL_STATUS_OUTGOING} from "../constants/callModes";
@@ -102,6 +102,11 @@ export const chatCallBoxShowingReducer = (state = {showing: false, thread: null,
   switch (action.type) {
     case CHAT_CALL_BOX_SHOWING:
       return action.payload;
+    case THREAD_CHANGED:
+      if (state.thread?.id === action.payload.id) {
+        console.log(action.payload)
+        return {...state, thread: {...state.thread, ...action.payload}}
+      }
     default:
       return state;
   }
@@ -152,6 +157,7 @@ export const chatCallParticipantListReducer = (state = {
       };
     case CHAT_CALL_PARTICIPANT_LIST_CHANGE:
     case CHAT_CALL_PARTICIPANT_JOINED:
+      console.log(state.participants, action.payload)
       return {
         ...state, ...stateGenerator(SUCCESS, {
           participants: updateStore(state.participants, action.payload, {
