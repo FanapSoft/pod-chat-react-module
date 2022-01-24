@@ -6,6 +6,19 @@
   display: inline-block;
 }
 
+.MainHeadCallButtons__JoinCallButton {
+  background-color: $color-green-dark;
+  text-align: center;
+  font-size: $font-size-sm;
+  margin: 0;
+  font-weight: normal;
+  padding: 5px;
+  min-height: 32px;
+  &:hover {
+    background-color: $color-green-dark;
+  }
+}
+
 @include grid("md") {
 
   .MainHeadCallButtons__Button:not(.MainHeadCallButtons__Button--smallVersion) {

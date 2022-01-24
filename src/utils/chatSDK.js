@@ -255,6 +255,16 @@ export default class ChatSDK {
       if (!this._onError(result, reject)) {
         const {threads, hasNext, nextOffset} = result.result;
         threads.forEach(e => e.draftMessage = Cookies.get(e.id));
+/*        this.getUnjoinedCallThreads(threads.map(thread => thread.id)).then(result => {
+          const threadWithCallObject = threads.map(thread => {
+            const call = result.find(callObject => callObject.conversationVO.id === thread.id);
+            if (callObject) {
+              return {...thread, callObject}
+            }
+            return thread;
+          });
+          return resolve({threads, hasNext, nextOffset});
+        });*/
         return resolve({threads, hasNext, nextOffset});
       }
     });
@@ -1058,6 +1068,26 @@ export default class ChatSDK {
       contactIds
     };
     this.chatAgent.addCallParticipants(params, function (result) {
+      resolve(result);
+    });
+  }
+
+  @promiseDecorator
+  joinCall(resolve, reject, callId) {
+    const params = {
+      callId
+    };
+    this.chatAgent.joinCall(params, function (result) {
+      resolve(result);
+    });
+  }
+
+  @promiseDecorator
+  getUnjoinedCallThreads(resolve, reject, threadIds) {
+    const params = {
+      threadIds
+    };
+    this.chatAgent.joinCall(params, function (result) {
       resolve(result);
     });
   }

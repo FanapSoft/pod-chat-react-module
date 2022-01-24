@@ -3,7 +3,6 @@ import {avatarNameGenerator, avatarUrlGenerator, getMessageMetaData} from "../ut
 import AsideThreadsLastSeenMessage from "./AsideThreadsLastSeenMessage";
 
 import Avatar, {AvatarImage, AvatarName, AvatarText} from "../../../pod-chat-ui-kit/src/avatar";
-import {Text} from "../../../pod-chat-ui-kit/src/typography";
 import {ListItem} from "../../../pod-chat-ui-kit/src/list";
 import Shape, {ShapeCircle} from "../../../pod-chat-ui-kit/src/shape";
 import Container from "../../../pod-chat-ui-kit/src/container";
@@ -20,7 +19,6 @@ import {
 } from "react-icons/ai";
 
 import style from "../../styles/app/AsideThreadsThread.scss";
-
 
 function AsideThreadsThread({
                               isMenuShow,
@@ -58,7 +56,7 @@ function AsideThreadsThread({
     touchPosition = `${e.touches[0].pageX}${e.touches[0].pageY}`;
   };
   const isUnreadCountExceeded = thread.unreadCount > 999;
-  return <Fragment>
+  return <>
     <ContextTrigger id="aside-threads-context-menu" holdToDisplay={-1}
                     collect={() => thread}
                     contextTriggerRef={e => trigger = e}>
@@ -138,7 +136,7 @@ function AsideThreadsThread({
         </ListItem>
       </Container>
     </ContextTrigger>
-  </Fragment>
+  </>
 }
 
 export default React.memo(AsideThreadsThread/*, (props, nextProps) => {

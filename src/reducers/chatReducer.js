@@ -104,7 +104,6 @@ export const chatCallBoxShowingReducer = (state = {showing: false, thread: null,
       return action.payload;
     case THREAD_CHANGED:
       if (state.thread?.id === action.payload.id) {
-        console.log(action.payload)
         return {...state, thread: {...state.thread, ...action.payload}}
       }
     default:
@@ -157,7 +156,6 @@ export const chatCallParticipantListReducer = (state = {
       };
     case CHAT_CALL_PARTICIPANT_LIST_CHANGE:
     case CHAT_CALL_PARTICIPANT_JOINED:
-      console.log(state.participants, action.payload)
       return {
         ...state, ...stateGenerator(SUCCESS, {
           participants: updateStore(state.participants, action.payload, {

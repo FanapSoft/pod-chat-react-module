@@ -10,7 +10,6 @@ import strings from "../constants/localization";
 
 //UI components
 import Container from "../../../pod-chat-ui-kit/src/container";
-import {Text} from "../../../pod-chat-ui-kit/src/typography";
 import {Button} from "../../../pod-chat-ui-kit/src/button";
 import {MdVideocam, MdPhone} from "react-icons/md";
 
@@ -18,7 +17,7 @@ import {MdVideocam, MdPhone} from "react-icons/md";
 //styling
 import style from "../../styles/app/MainHeadCallButtons.scss";
 import {
-  chatCallBoxShowing, chatCallGetParticipantList, chatSelectParticipantForCallShowing,
+  chatCallBoxShowing, chatCallGetParticipantList, chatCallJoin, chatSelectParticipantForCallShowing,
   chatStartCall,
   chatStartGroupCall
 } from "../actions/chatActions";
@@ -33,7 +32,6 @@ import MakeGlobalCall from "./_component/MakeGlobalCall";
 @connect(store => {
   return {
     chatCallStatus: store.chatCallStatus,
-
     participants: store.threadParticipantList.participants,
   };
 })
@@ -43,9 +41,14 @@ export default class MainHeadCallButtons extends Component {
     super(props);
     this.onVoiceCallClick = this.onVoiceCallClick.bind(this);
     this.onVideoCallClick = this.onVideoCallClick.bind(this);
+    this.onJoinCall = this.onJoinCall.bind(this);
     this.makeGlobalCallRef = React.createRef();
   }
 
+  onJoinCall() {
+    const {thread, dispatch} = this.props;
+    dispatch(chatCallJoin(thread.call.id, thread));
+  }
 
   _groupCall(type) {
     const {participants, thread, user, dispatch} = this.props;
@@ -98,22 +101,33 @@ export default class MainHeadCallButtons extends Component {
     const {smallVersion, chatCallStatus, thread} = this.props;
     const classNames = classnames({
       [style.MainHeadCallButtons__Button]: true,
-      [style["MainHeadCallButtons__Button--smallVersion"]]: smallVersion
+      [style["MainHeadCallButtons__Button--smallVersion"]]: smallVersion,
+
     });
+    const isJoinCall = thread.call;
     return (
       <Container inline>
-        <MakeGlobalCall noRender ref={this.makeGlobalCallRef} dualMode thread={thread}/>
-        <Container className={classNames} onClick={chatCallStatus.status ? e => {
-        } : this.onVoiceCallClick}>
-          <MdPhone size={style.iconSizeMd}
-                   color={chatCallStatus.status ? "rgb(255 255 255 / 30%)" : style.colorWhite}/>
-        </Container>
+        {isGroup(thread) && <MakeGlobalCall noRender ref={this.makeGlobalCallRef} dualMode thread={thread}/>}
+        {isJoinCall ?
 
-        <Container className={classNames} onClick={chatCallStatus.status ? e => {
-        } : this.onVideoCallClick}>
-          <MdVideocam size={style.iconSizeMd}
-                      color={chatCallStatus.status ? "rgb(255 255 255 / 30%)" : style.colorWhite}/>
-        </Container>
+          <Button className={style.MainHeadCallButtons__JoinCallButton}
+                  onClick={this.onJoinCall}>{strings.joinCall}</Button>
+          :
+          <>
+            <Container className={classNames} onClick={chatCallStatus.status ? e => {
+            } : this.onVoiceCallClick}>
+              <MdPhone size={style.iconSizeMd}
+                       color={chatCallStatus.status ? "rgb(255 255 255 / 30%)" : style.colorWhite}/>
+            </Container>
+
+            <Container className={classNames} onClick={chatCallStatus.status ? e => {
+            } : this.onVideoCallClick}>
+              <MdVideocam size={style.iconSizeMd}
+                          color={chatCallStatus.status ? "rgb(255 255 255 / 30%)" : style.colorWhite}/>
+            </Container>
+          </>
+        }
+
 
       </Container>
     )

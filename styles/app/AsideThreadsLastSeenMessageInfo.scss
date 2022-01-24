@@ -1,0 +1,15 @@
+.AsideThreadsLastSeenMessageInfo {
+  display: inline-flex;
+  align-items: center;
+}
+.AsideThreadsLastSeenMessageInfo__JoinCallButton {
+  margin: 0;
+  position: absolute;
+  left: 0;
+  font-size: $font-size-xsm;
+  padding: 2px;
+  min-height: 23px;
+  width: 75px;
+  background-color: $color-green-dark;
+  box-shadow: none;
+}

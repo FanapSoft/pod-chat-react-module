@@ -40,7 +40,6 @@ import style from "../../styles/app/AsideThreads.scss";
 import {CHAT_CALL_BOX_COMPACTED, CHAT_CALL_BOX_FULL_SCREEN} from "../constants/callModes";
 
 
-
 function PartialLoadingFragment() {
   return (
     <Container bottomCenter centerTextAlign style={{zIndex: 1}}>
@@ -150,7 +149,17 @@ class AsideThreads extends Component {
   }
 
   render() {
-    const {threads, threadsFetching, threadsHasNext, threadShowing, chatInstance, chatSearchResult, user, threadsPartialFetching, chatCallBoxShowing} = this.props;
+    const {
+      threads,
+      threadsFetching,
+      threadsHasNext,
+      threadShowing,
+      chatInstance,
+      chatSearchResult,
+      user,
+      threadsPartialFetching,
+      chatCallBoxShowing
+    } = this.props;
     const {activeThread, isMenuShow} = this.state;
     const callBoxCompactedCondition = chatCallBoxShowing.showing === CHAT_CALL_BOX_COMPACTED;
     const isMobile = mobileCheck();
@@ -241,7 +250,7 @@ class AsideThreads extends Component {
           }
           {!isSearchResult &&
           <Virtuoso data={filteredThreads}
-                    endReached={()=> threadsHasNext && !threadsPartialFetching && !isSearchResult && this.onScrollBottomThreshold()}
+                    endReached={() => threadsHasNext && !threadsPartialFetching && !isSearchResult && this.onScrollBottomThreshold()}
                     className={scrollerClassNames}
                     fixedItemHeight={82.5}
                     itemContent={(index, el) =>

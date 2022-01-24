@@ -1,6 +1,6 @@
 {
   "name": "podchatweb",
-  "version": "1.30.3",
+  "version": "1.31.0",
   "description": "Podchatweb is a web app built by react for handling POD messaging platform use cases",
   "main": "dist/index.js",
   "scripts": {

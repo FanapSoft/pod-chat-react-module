@@ -532,6 +532,17 @@ export const chatCallAddParticipants = (callId, contactIds, participants) => {
   }
 };
 
+export const chatCallJoin = (callId, thread) => {
+  return (dispatch, getState) => {
+    const state = getState();
+    const chatSDK = state.chatInstance.chatSDK;
+    chatSDK.joinCall(callId).then(call=>{
+      dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, thread));
+    })
+
+  }
+};
+
 export const chatCallGetParticipantList = (callId, payload, direct) => {
   return (dispatch, getState) => {
     if (!callId && !payload) {
