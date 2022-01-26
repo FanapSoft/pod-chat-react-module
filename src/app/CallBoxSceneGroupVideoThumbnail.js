@@ -164,7 +164,7 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
                          style={{margin: "3px 4px"}}/>
           }
         </Container>
-        <Container id={isScreenShare ? "video-screenShare" : `video-${sceneParticipant.id}`}
+        <Container id={isScreenShare ? "video-screenShare" : `video-${sceneParticipant ? sceneParticipant.id : "video-scene"}`}
                    className={style.CallBoxSceneGroupVideoThumbnail__CamVideoContainer}/>
         {sceneParticipant && sceneParticipant.videoMute &&
         <Container center>
