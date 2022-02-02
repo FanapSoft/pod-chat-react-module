@@ -54,7 +54,7 @@ import {
   CHAT_CALL_PARTICIPANT_LEFT,
   CHAT_CALL_PARTICIPANT_JOINED,
   CHAT_CALL_PARTICIPANT_LIST_CHANGE,
-  CHAT_CALL_GROUP_VIDEO_VIEW_MODE, CHAT_CALL_GROUP_SETTINGS_SHOWING, CHAT_TYPING_HOOK
+  CHAT_CALL_GROUP_VIDEO_VIEW_MODE, CHAT_CALL_GROUP_SETTINGS_SHOWING, CHAT_TYPING_HOOK, THREAD_UPDATE
 } from "../constants/actionTypes";
 import {messageInfo} from "./messageActions";
 import {THREAD_HISTORY_LIMIT_PER_REQUEST} from "../constants/historyFetchLimits";
@@ -597,12 +597,19 @@ export const chatCallParticipantListChange = participants => {
 };
 
 
-export const chatAcceptCall = (call) => {
+export const chatAcceptCall = (call, isJoin, thread) => {
   return (dispatch, getState) => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
-    chatSDK.acceptCall(call.callId);
     dispatch(chatCallStatus(CHAT_CALL_STATUS_STARTED, call));
+    if(isJoin) {
+      const {call, ...other} = thread;
+      dispatch({
+        type: THREAD_UPDATE,
+        payload: other
+      })
+    }
+    return chatSDK.acceptCall(call.callId || call.id);
   }
 };
 

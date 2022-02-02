@@ -15,8 +15,9 @@ import style from "../../styles/app/AsideThreadsLastSeenMessageInfo.scss";
 import {chatCallJoin} from "../actions/chatActions";
 import strings from "../constants/localization";
 
-export default function ({isGroup, isChannel, time, lastMessageVO, draftMessage, isMessageByMe, call}) {
-  const dispatch = useDispatch()
+export default function ({isGroup, isChannel, time, lastMessageVO, draftMessage, isMessageByMe, thread}) {
+  const dispatch = useDispatch();
+  const {call} = thread
   const onJoinCall = e => {
     e.stopPropagation()
     dispatch(chatCallJoin(call));

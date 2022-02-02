@@ -320,6 +320,9 @@ let strings = new LocalizedStrings({
     callStartedAt: (date) => {
       return `تماس درخواستی برقرار شد ${date}`;
     },
+    youLeaveTheCall: (date) => {
+      return `شما از تماس خارج شدید ${date}`;
+    },
     forExportingPleaseEnterDates: "برای استخراج پیام های ابتدا بازه تاریخ را انتخاب نمایید",
     export: "استخراج",
     threadParticipantList: "لیست اعضا گروه",

@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
 import classnames from "classnames";
-import {avatarNameGenerator, avatarUrlGenerator, getMessageMetaData} from "../utils/helpers";
+import {avatarNameGenerator, avatarUrlGenerator, getMessageMetaData, mobileCheck} from "../utils/helpers";
 import {
   CALL_DIV_ID, CALL_SETTING_COOKIE_KEY_NAME,
   CALL_SETTINGS_CHANGE_EVENT,
@@ -142,6 +142,7 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
 
     const listClassNames = classnames({
       [style.CallBoxSceneGroupVideoThumbnail__List]: true,
+      [style["CallBoxSceneGroupVideoThumbnail__List--mobile"]]: mobileCheck(),
       [style["CallBoxSceneGroupVideoThumbnail__List--fullScreen"]]: fullScreenCondition
     })
 

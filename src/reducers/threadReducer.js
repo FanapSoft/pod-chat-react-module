@@ -54,7 +54,7 @@ import {
   THREAD_DRAFT,
   THREAD_GET_PARTICIPANT_ROLES,
   THREAD_TRIM_DOWN_HISTORY,
-  THREAD_EXPORT_MESSAGES_SHOWING
+  THREAD_EXPORT_MESSAGES_SHOWING, THREAD_UPDATE
 } from "../constants/actionTypes";
 import {stateGenerator, updateStore, listUpdateStrategyMethods, stateGeneratorState} from "../utils/storeHelper";
 import {getNow, isMessageByMe} from "../utils/helpers";
@@ -139,6 +139,13 @@ export const threadCreateReducer = (state = {
     case THREAD_CHANGED:
       return {
         ...state, ...stateGenerator(SUCCESS, updateStore(state.thread, {...state.thread, ...action.payload}, {
+          by: "id",
+          method: listUpdateStrategyMethods.UPDATE
+        }), "thread")
+      };
+    case THREAD_UPDATE:
+      return {
+        ...state, ...stateGenerator(SUCCESS, updateStore(state.thread, action.payload, {
           by: "id",
           method: listUpdateStrategyMethods.UPDATE
         }), "thread")
@@ -360,8 +367,9 @@ export const threadsReducer = (state = {
       };
     }
     case THREAD_NEW:
+    case THREAD_UPDATE:
     case THREAD_CHANGED: {
-      let threads = updateStore(state.threads, action.type === THREAD_CHANGED ? action.payload : action.payload.thread, {
+      let threads = updateStore(state.threads, action.type === THREAD_NEW ? action.payload.thread : action.payload, {
         method: listUpdateStrategyMethods.UPDATE,
         mix: action.type === THREAD_CHANGED,
         upsert: true,

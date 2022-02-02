@@ -17,7 +17,7 @@ import {THREAD_ADMIN} from "../constants/privilege";
 import {Text} from "../../../pod-chat-ui-kit/src/typography";
 import {ACTUAL_IMAGE_SIZE, LARGE_IMAGE_SIZE, MEDIUM_IMAGE_SIZE, SMALL_IMAGE_SIZE} from "../constants/podspace";
 import style from "../../styles/utils/ghost.scss";
-import {MdCallMissed, MdCallEnd, MdPhoneInTalk} from "react-icons/md";
+import {MdCallMissed, MdCallEnd, MdPhoneInTalk, MdTimeToLeave, MdPhoneDisabled} from "react-icons/md";
 
 
 export function humanFileSize(bytes, si) {
@@ -862,7 +862,7 @@ export function findRemoteStreams(user, participants, callDivs) {
 }
 
 export function analyzeCallStatus(message, user, thread) {
-  const isMessageByMeBool = isMessageByMe(message, user, thread);
+  const isMessageByMeBool = user instanceof Boolean ? user : isMessageByMe(message, user, thread);
   const isGroupThread = isGroup(thread);
   const {
     createTime,
@@ -925,6 +925,16 @@ export function analyzeCallStatus(message, user, thread) {
         },
         Text() {
           return strings.callStartedAt(messageDatePetrification(startTime, true));
+        }
+      };
+    }
+    case 8: {
+      return {
+        Icon() {
+          return <MdPhoneDisabled color={style.colorRed} size={style.iconSizeSm} style={{marginLeft: "5px"}}/>;
+        },
+        Text() {
+          return strings.youLeaveTheCall(messageDatePetrification(startTime, true));
         }
       };
     }

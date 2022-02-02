@@ -157,8 +157,8 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
               <ContactListItem invert
                                contact={participant}
                                AvatarTextFragment={isCallOwner ? ({contact}) => {
-                                   return <Text size="xs" color={contact.joined ? "green" : "accent"} bold>
-                                     {contact.joined ? strings.callStarted : strings.callingWithNoType}
+                                   return <Text size="xs" color={contact.callStatus === 6  ? "green" : "accent"} bold>
+                                     {contact.callStatus === 6 ? strings.callStarted : strings.callingWithNoType}
                                    </Text>
                                  }
                                  : null}

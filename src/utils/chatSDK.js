@@ -255,17 +255,17 @@ export default class ChatSDK {
       if (!this._onError(result, reject)) {
         const {threads, hasNext, nextOffset} = result.result;
         threads.forEach(e => e.draftMessage = Cookies.get(e.id));
-        this.getCallsToJoin(threads.map(thread => thread.id)).then(result => {
-          const threadWithCallObject = threads.map(thread => {
+        this.getCallsToJoin(threads.map(thread => thread.id)).then(({result}) => {
+          const threadsWithCallObject = threads.map(thread => {
             const call = result.find(callObject => callObject.conversationVO.id === thread.id);
-            if (callObject) {
-              return {...thread, callObject}
+            if (call) {
+              return {...thread, call}
             }
             return thread;
           });
-          return resolve({threads, hasNext, nextOffset});
+          resolve({threads: threadsWithCallObject, hasNext, nextOffset});
         });
-        return resolve({threads, hasNext, nextOffset});
+        //return resolve({threads, hasNext, nextOffset});
       }
     });
   }
@@ -1088,6 +1088,16 @@ export default class ChatSDK {
       threadIds
     };
     this.chatAgent.getCallsToJoin(params, function (result) {
+      resolve(result);
+    });
+  }
+
+  @promiseDecorator
+  joinCall(resolve, reject, callId) {
+    const params = {
+      threadIds
+    };
+    this.chatAgent.join(params, function (result) {
       resolve(result);
     });
   }

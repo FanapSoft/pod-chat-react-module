@@ -61,7 +61,7 @@ object-assign
  */
 
 /*!
- * wavesurfer.js 5.1.0 (2021-06-20)
+ * wavesurfer.js 5.2.0 (2021-08-16)
  * https://wavesurfer-js.org
  * @license BSD-3-Clause
  */
@@ -114,6 +114,8 @@ PERFORMANCE OF THIS SOFTWARE.
 /*! ./prevent-click */
 
 /*! ./request-animation-frame */
+
+/*! ./silence-mode */
 
 /*! ./style */
 
@@ -196,6 +198,10 @@ PERFORMANCE OF THIS SOFTWARE.
 /*!*********************************!*\
   !*** ./src/util/orientation.js ***!
   \*********************************/
+
+/*!**********************************!*\
+  !*** ./src/util/silence-mode.js ***!
+  \**********************************/
 
 /*!***********************************!*\
   !*** ./src/drawer.canvasentry.js ***!
