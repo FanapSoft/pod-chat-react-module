@@ -5,6 +5,8 @@ import {Route, withRouter} from "react-router-dom";
 import {statics as contactListStatics} from "./ModalContactList";
 import classnames from "classnames";
 import checkForPrivilege from "./../utils/privilege";
+import {ToastContainer} from "react-toastify";
+import "../../styles/utils/toaster.scss";
 
 //strings
 import strings from "../constants/localization";
@@ -61,10 +63,10 @@ import ModalExportMessages from "./ModalExportMessages";
 import style from "../../styles/app/index.scss";
 import {isChannel, isThreadOwner} from "../utils/helpers";
 import {THREAD_ADMIN} from "../constants/privilege";
-import IndexErrorHandler from "./IndexErrorHandler";
 import CallBox from "./CallBox";
 import {CHAT_CALL_BOX_COMPACTED} from "../constants/callModes";
 import CallBoxCompacted from "./CallBoxCompacted";
+
 
 
 @connect(store => {
@@ -95,8 +97,25 @@ class Index extends Component {
   }
 
   componentDidUpdate(oldProps) {
-    const {token, location, user: propsUser, chatInstance, dispatch, clearCache, thread, messageNew, onNewMessage, onReady} = this.props;
-    const {token: oldToken, thread: oldThread, messageNew: oldMessageNew, user: oldUser, location: oldLocation} = oldProps;
+    const {
+      token,
+      location,
+      user: propsUser,
+      chatInstance,
+      dispatch,
+      clearCache,
+      thread,
+      messageNew,
+      onNewMessage,
+      onReady
+    } = this.props;
+    const {
+      token: oldToken,
+      thread: oldThread,
+      messageNew: oldMessageNew,
+      user: oldUser,
+      location: oldLocation
+    } = oldProps;
     const {user, fetching: userFetching} = propsUser;
 
     //outside events handler
@@ -168,7 +187,17 @@ class Index extends Component {
   }
 
   componentDidMount() {
-    const {small, supportMode, routerLess, dispatch, disableNotification, onNotificationClickHook, onRetryHook, onSignOutHook, onTypingHook} = this.props;
+    const {
+      small,
+      supportMode,
+      routerLess,
+      dispatch,
+      disableNotification,
+      onNotificationClickHook,
+      onRetryHook,
+      onSignOutHook,
+      onTypingHook
+    } = this.props;
     dispatch(chatSetInstance(this.props));
     if (small || supportMode) {
       dispatch(chatSmallVersion(true))
@@ -228,7 +257,15 @@ class Index extends Component {
   /*----outside api---*/
 
   render() {
-    const {threadShowing, customClassName, leftAsideShowing, small, chatRouterLess, supportMode, chatCallBoxShowing} = this.props;
+    const {
+      threadShowing,
+      customClassName,
+      leftAsideShowing,
+      small,
+      chatRouterLess,
+      supportMode,
+      chatCallBoxShowing
+    } = this.props;
     const classNames = classnames({
       [customClassName]: customClassName,
       [style.Index]: true,
@@ -254,6 +291,18 @@ class Index extends Component {
           :
 
           <Fragment>
+            <ToastContainer
+              enableMultiContainer
+              containerId={"main-toaster"}
+              position="top-right"
+              autoClose={1000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover={false}/>
             <Route exact={!chatRouterLess} path={chatRouterLess ? "" : [ROUTE_CREATE_GROUP, ROUTE_CREATE_CHANNEL]}
                    render={() => <ModalCreateGroup smallVersion={small}/>}/>
             <Route exact={!chatRouterLess} path={chatRouterLess ? "" : ROUTE_CONTACTS}

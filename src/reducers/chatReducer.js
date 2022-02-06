@@ -129,6 +129,24 @@ export const chatCallGroupVideoViewModeReducer = (state = "grid"/*thumbnail*/, a
   }
 };
 
+export const chatCallParticipantJoinedReducer = (state = {}, action) => {
+  switch (action.type) {
+    case CHAT_CALL_PARTICIPANT_JOINED:
+      return {...action.payload[0], joinTime: Date.now()};
+    default:
+      return state;
+  }
+};
+
+export const chatCallParticipantLeftReducer = (state = {}, action) => {
+  switch (action.type) {
+    case CHAT_CALL_PARTICIPANT_LEFT:
+      return action.payload[0];
+    default:
+      return state;
+  }
+};
+
 export const chatCallParticipantListReducer = (state = {
   participants: [],
   fetching: false,

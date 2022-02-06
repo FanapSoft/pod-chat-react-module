@@ -219,7 +219,6 @@ export const chatSetInstance = config => {
                 const newMap = oldThreadParticipant.map(participant => {
                   const found = participants.find(finded => {
                     if (participant.id === finded.id) {
-                      finded.joined = true;
                       return finded;
                     }
                   });
@@ -570,7 +569,6 @@ export const chatCallGetParticipantList = (callId, payload, direct) => {
 
 export const chatCallParticipantJoined = participant => {
   return dispatch => {
-    participant.joined = true;
     dispatch({
       type: CHAT_CALL_PARTICIPANT_JOINED,
       payload: participant

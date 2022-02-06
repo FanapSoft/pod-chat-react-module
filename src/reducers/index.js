@@ -63,7 +63,9 @@ import {
   chatCallStatusReducer,
   chatCallParticipantListReducer,
   chatCallGroupSettingsShowingReducer,
-  chatCallGroupVideoViewModeReducer
+  chatCallGroupVideoViewModeReducer,
+  chatCallParticipantJoinedReducer,
+  chatCallParticipantLeftReducer
 } from "./chatReducer";
 import userReducer from "./userReducer";
 
@@ -89,6 +91,8 @@ const rootReducer = {
   chatCallParticipantList: chatCallParticipantListReducer,
   chatCallGroupSettingsShowing: chatCallGroupSettingsShowingReducer,
   chatCallGroupVideoViewMode: chatCallGroupVideoViewModeReducer,
+  chatCallParticipantJoined: chatCallParticipantJoinedReducer,
+  chatCallParticipantLeft: chatCallParticipantLeftReducer,
   contactGetList: contactGetListReducer,
   contactGetListPartial: contactGetListPartialReducer,
   contactListShowing: contactListShowingReducer,

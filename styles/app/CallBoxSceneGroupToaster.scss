@@ -1,0 +1,17 @@
+.CallBoxSceneGroupToaster {
+  max-width: 100%;
+  position: absolute;
+  bottom: 0;
+  padding: 0 10px;
+}
+
+.CallBoxSceneGroupToaster__Toast {
+  padding: 0;
+  border-radius: 50px;
+  box-shadow: none;
+  color: #fff;
+  background-color: #343b4b;
+  min-height: 25px;
+  font-size: 10px;
+  margin-bottom: 0;
+}

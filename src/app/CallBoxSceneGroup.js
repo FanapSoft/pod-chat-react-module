@@ -3,7 +3,7 @@ import {connect} from "react-redux";
 import {getImage, getName} from "./_component/contactList";
 import classnames from "classnames";
 import Gap from "raduikit/src/gap";
-import strings from "../constants/localization";
+import CallBoxSceneGroupToaster from "./CallBoxSceneGroupToaster";
 import CallBoxSceneGroupVideo from "./CallBoxSceneGroupVideo";
 import CallBoxSceneGroupVoice from "./CallBoxSceneGroupVoice";
 import {
@@ -17,24 +17,14 @@ import {
 import {
   CHAT_CALL_BOX_FULL_SCREEN,
   CHAT_CALL_STATUS_INCOMING,
-  CHAT_CALL_STATUS_OUTGOING,
-  CHAT_CALL_STATUS_STARTED,
-  MOCK_CONTACT,
-  MOCK_USER
+  CHAT_CALL_STATUS_STARTED
 } from "../constants/callModes";
 
 //actions
-import {threadCreateWithExistThread, threadGoToMessageId} from "../actions/threadActions";
-import {chatAudioPlayer} from "../actions/chatActions";
 
 //components
 import Container from "../../../pod-chat-ui-kit/src/container";
 import {Text} from "../../../pod-chat-ui-kit/src/typography";
-import {
-  MdClose,
-  MdPlayArrow,
-  MdPause
-} from "react-icons/md";
 import Avatar, {AvatarImage, AvatarName} from "../../../pod-chat-ui-kit/src/avatar";
 import AvatarText from "../../../pod-chat-ui-kit/src/avatar/AvatarText";
 
@@ -75,10 +65,14 @@ export default class CallBoxSceneGroup extends Component {
       user
     };
     if ((isScreenShare(call) || isVideoCall(call)) && !incomingCondition && startedCondition) {
-      return <CallBoxSceneGroupVideo {...commonArgs}/>
+      return <>
+        <CallBoxSceneGroupToaster/>
+        <CallBoxSceneGroupVideo {...commonArgs}/>
+      </>
     }
     return <Container className={style.CallBoxSceneGroup}>
-      {!isVideoCallResult && !incomingCondition &&  <CallBoxSceneGroupVoice {...commonArgs}/>}
+      <CallBoxSceneGroupToaster/>
+      {!isVideoCallResult && !incomingCondition && <CallBoxSceneGroupVoice {...commonArgs}/>}
       <Container className={avatarContainerClassNames}>
         <Avatar cssClassNames={avatarClassName} inline={false}>
           <AvatarImage
@@ -105,7 +99,5 @@ export default class CallBoxSceneGroup extends Component {
         </Avatar>
       </Container>
     </Container>
-
-
   }
 }

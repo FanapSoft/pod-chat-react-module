@@ -331,7 +331,13 @@ let strings = new LocalizedStrings({
     shareScreen: "اشتراک صفحه نمایش",
     recordCallSession: "ضبط جلسه تماس",
     isRecordingCallSession: name => `${name} در حال ضبط جلسه تماس`,
-    userMutedTheVideo: "تصویر متوقف شده است"
+    userMutedTheVideo: "تصویر متوقف شده است",
+    participantJoinedToCall(participant) {
+      return `${participant} وارد تماس شد`
+    },
+    participantLeftCall(participant) {
+      return `${participant} از تماس خارج شد`
+    },
   },
   it: {}
 });

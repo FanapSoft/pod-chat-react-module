@@ -183,7 +183,7 @@ export default class CallBox extends Component {
       [style["CallBox__ControlSet--hide"]]: !showControl && fullScreenCondition
     });
 
-    return <Container className={classNames} onClick={fullScreenCondition && this.hideOrShowControls}>
+    return <Container className={classNames} onClick={fullScreenCondition && this.hideOrShowControls} id="chat-call-box">
 
       <Container className={callBoxHeadClassNames} onClick={this.onCallBoxClick}>
         <CallBoxHead chatCallStatus={chatCallStatus} thread={thread} chatCallBoxShowing={chatCallBoxShowing}/>
