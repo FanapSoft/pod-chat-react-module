@@ -275,7 +275,7 @@ let strings = new LocalizedStrings({
       sound: "صداها",
       voice: "ضبط شده‌ها"
     },
-    callingWithNoType: "در حال تماس",
+    callingWithNoType: "در حال برقراری ارتباط",
     calling: isVideoCall => {
       if (isVideoCall) {
         return "درحال برقراری ارتباط تصویری";
@@ -296,7 +296,7 @@ let strings = new LocalizedStrings({
     ringToneSound: "آهنگ زنگ",
     callToneSound: "آهنگ تماس",
     peopleIsTalking: (numberOfPeople) => {
-      return `${numberOfPeople} نفر در حال مکالمه`
+      return `${numberOfPeople} نفر در تماس`
     },
     missedCallAt: date => {
       return `تماس از دست رفته در ${date}`
