@@ -97,7 +97,8 @@ export default class ChatSDK {
 
   _onCallEvents() {
     this.chatAgent.on("callEvents", (event) => {
-      this.onCallEvents(event.result, event.type);
+      const {type, result, ...other} = event;
+      this.onCallEvents(result || other, type);
     });
   }
 
@@ -259,6 +260,7 @@ export default class ChatSDK {
           const threadsWithCallObject = threads.map(thread => {
             const call = result.find(callObject => callObject.conversationVO.id === thread.id);
             if (call) {
+              call.callId = call.id;
               return {...thread, call}
             }
             return thread;
@@ -979,12 +981,10 @@ export default class ChatSDK {
   }
 
   @promiseDecorator
-  acceptCall(resolve, reject, callId) {
+  acceptCall(resolve, reject, callId, options) {
     this.chatAgent.acceptCall({
       callId,
-      cameraPaused: false,
-      video: true,
-      mute: false
+      ...options
     }, function (res) {
       resolve(res)
     });

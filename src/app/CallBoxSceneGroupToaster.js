@@ -3,6 +3,7 @@ import {connect} from "react-redux";
 import {toast, ToastContainer} from "react-toastify";
 import {getName} from "./_component/contactList";
 import strings from "../constants/localization";
+import classnames from "classnames";
 
 //actions
 
@@ -10,6 +11,7 @@ import strings from "../constants/localization";
 
 //styling
 import style from "../../styles/app/CallBoxSceneGroupToaster.scss";
+
 
 const COMMON_TOAST_OPTIONS = {
   position: "bottom-center",
@@ -46,11 +48,15 @@ export default class CallBoxSceneGroup extends Component {
   }
 
   render() {
+    const classNames = classnames({
+      [style.CallBoxSceneGroupToaster]: true,
+      [style["CallBoxSceneGroupToaster--VideoCall"]]: this.props.isVideoCall
+    })
     return <ToastContainer
       enableMultiContainer
       position="bottom-center"
       containerId={COMMON_TOAST_OPTIONS.containerId}
-      className={style.CallBoxSceneGroupToaster}
+      className={classNames}
       autoClose={1000}
       hideProgressBar={false}
       newestOnTop={false}

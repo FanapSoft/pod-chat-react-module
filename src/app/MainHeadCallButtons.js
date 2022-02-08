@@ -18,7 +18,7 @@ import {MdVideocam, MdPhone} from "react-icons/md";
 import style from "../../styles/app/MainHeadCallButtons.scss";
 import {
   chatAcceptCall,
-  chatCallBoxShowing, chatCallGetParticipantList, chatCallJoin, chatSelectParticipantForCallShowing,
+  chatCallBoxShowing, chatCallGetParticipantList, chatCallEnded, chatSelectParticipantForCallShowing,
   chatStartCall,
   chatStartGroupCall
 } from "../actions/chatActions";
@@ -49,8 +49,6 @@ export default class MainHeadCallButtons extends Component {
   onJoinCall() {
     const {thread, dispatch} = this.props;
     dispatch(chatAcceptCall(thread.call, true, thread));
-    dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, thread));
-    setTimeout(() => dispatch(chatCallGetParticipantList(thread.call.id)), 1000);
   }
 
   _groupCall(type) {

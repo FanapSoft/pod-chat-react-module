@@ -66,12 +66,12 @@ export default class CallBoxSceneGroup extends Component {
     };
     if ((isScreenShare(call) || isVideoCall(call)) && !incomingCondition && startedCondition) {
       return <>
-        <CallBoxSceneGroupToaster/>
+        <CallBoxSceneGroupToaster isVideoCall={isVideoCallResult}/>
         <CallBoxSceneGroupVideo {...commonArgs}/>
       </>
     }
     return <Container className={style.CallBoxSceneGroup}>
-      <CallBoxSceneGroupToaster/>
+      <CallBoxSceneGroupToaster isVideoCall={isVideoCallResult}/>
       {!isVideoCallResult && !incomingCondition && <CallBoxSceneGroupVoice {...commonArgs}/>}
       <Container className={avatarContainerClassNames}>
         <Avatar cssClassNames={avatarClassName} inline={false}>

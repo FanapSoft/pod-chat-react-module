@@ -194,10 +194,6 @@ export default class CallBoxControlSet extends Component {
       [style.CallBoxControlSet__Button]: true,
       [style.CallBoxControlSet__AcceptCall]: true
     });
-    const speakerOnOrOffClassNames = classnames({
-      [style.CallBoxControlSet__Button]: true,
-      [style.CallBoxControlSet__Speaker]: true
-    });
     const micOffOrOnClassNames = classnames({
       [style.CallBoxControlSet__Button]: true,
       [style.CallBoxControlSet__Mic]: true

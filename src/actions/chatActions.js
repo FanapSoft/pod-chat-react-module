@@ -89,7 +89,7 @@ function findInTyping(threadId, userId, remove) {
   return {};
 }
 
-function resetChatCall(dispatch, call) {
+function resetChatCall(dispatch, call, callId, state) {
   dispatch(chatCallStatus());
   dispatch(chatCallGroupSettingsShowing(false));
   if (call) {
@@ -105,6 +105,16 @@ function resetChatCall(dispatch, call) {
   }
   document.getElementById(CALL_DIV_ID).innerHTML = "";
   dispatch(chatCallGetParticipantList());
+  if (callId) {
+    const found = state.threads.threads.find(thread => thread?.call?.id === callId);
+    if (found) {
+      const {call, ...other} = found;
+      dispatch({
+        type: THREAD_UPDATE,
+        payload: other
+      });
+    }
+  }
 }
 
 export const chatSetInstance = config => {
@@ -236,7 +246,7 @@ export const chatSetInstance = config => {
           }
           case "CALL_ENDED":
             dispatch(chatCallBoxShowing(false));
-            resetChatCall(dispatch, oldCall.call);
+            resetChatCall(dispatch, oldCall.call, call?.callId, getState());
             return;
           case "CALL_DIVS":
             return dispatch(chatCallStatus(CHAT_CALL_STATUS_STARTED, {...oldCall.call, ...call}));
@@ -531,14 +541,14 @@ export const chatCallAddParticipants = (callId, contactIds, participants) => {
   }
 };
 
-export const chatCallJoin = (callId, thread) => {
+export const chatCallEnded = (callId) => {
   return (dispatch, getState) => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
-    chatSDK.joinCall(callId).then(call=>{
+
+    chatSDK.joinCall(callId).then(call => {
       dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, thread));
     })
-
   }
 };
 
@@ -599,15 +609,18 @@ export const chatAcceptCall = (call, isJoin, thread) => {
   return (dispatch, getState) => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
+    const options = {joinCall: isJoin, video: call.type === 1, cameraPaused: call.type !== 1};
     dispatch(chatCallStatus(CHAT_CALL_STATUS_STARTED, call));
-    if(isJoin) {
+    if (isJoin) {
       const {call, ...other} = thread;
       dispatch({
         type: THREAD_UPDATE,
         payload: other
-      })
+      });
+      dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, thread));
+      setTimeout(() => dispatch(chatCallGetParticipantList(thread.call.id)), 1000);
     }
-    return chatSDK.acceptCall(call.callId || call.id);
+    return chatSDK.acceptCall(call.callId || call.id, options);
   }
 };
 
@@ -617,6 +630,14 @@ export const chatRejectCall = (call, status) => {
     const chatSDK = state.chatInstance.chatSDK;
     if (status === CHAT_CALL_STATUS_STARTED) {
       chatSDK.endCall(call.callId);
+      const found = state.threads.threads.find(thread => thread.id === call.conversationVO.id);
+      if (found) {
+        call.id = call.callId;
+        dispatch({
+          type: THREAD_UPDATE,
+          payload: {call, ...found}
+        });
+      }
     } else {
       if (call) {
         chatSDK.rejectCall(call.callId);

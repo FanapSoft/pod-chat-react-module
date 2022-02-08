@@ -12,15 +12,15 @@ import {
 } from "react-icons/md";
 
 import style from "../../styles/app/AsideThreadsLastSeenMessageInfo.scss";
-import {chatCallJoin} from "../actions/chatActions";
+import {chatAcceptCall, chatCallEnded} from "../actions/chatActions";
 import strings from "../constants/localization";
 
 export default function ({isGroup, isChannel, time, lastMessageVO, draftMessage, isMessageByMe, thread}) {
   const dispatch = useDispatch();
   const {call} = thread
   const onJoinCall = e => {
-    e.stopPropagation()
-    dispatch(chatCallJoin(call));
+    e.stopPropagation();
+    dispatch(chatAcceptCall(thread.call, true, thread));
   }
   return <Container topLeft className={style.AsideThreadsLastSeenMessageInfo}>
     {

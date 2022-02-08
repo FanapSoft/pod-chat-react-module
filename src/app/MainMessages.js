@@ -113,6 +113,9 @@ export default class MainMessages extends Component {
       this.setState({canPaste: false})
     });
     document.body.addEventListener("paste", e => this.state.canPaste && this.onPaste(e));
+    window.addEventListener("resize", e => {
+      this._fetchMore();
+    })
 
     //Controller fields
     this.gotoBottom = false;
@@ -255,8 +258,9 @@ export default class MainMessages extends Component {
       dispatch
     } = this.props;
     const {thread: oldThread} = oldProps;
-    const {fetching} = threadMessages;
+    const {fetching, hasNext, hasPrevious} = threadMessages;
     const threadId = thread.id;
+    const scroller = this.scroller?.current;
 
     if (!threadId) {
       return;
@@ -294,6 +298,11 @@ export default class MainMessages extends Component {
       return;
     }
 
+    //if messages is bigger than viewport and boxes are not bringing scrollbar load more
+    if (!fetching && !threadMessagesPartialFetching) {
+      this._fetchMore();
+    }
+
     if (this.lastSeenMessage) {
       if (this.windowFocused) {
         dispatch(messageSeen(this.lastSeenMessage));
@@ -305,16 +314,35 @@ export default class MainMessages extends Component {
       return this.goToSpecificMessage(this.hasPendingMessageToGo);
     }
 
-    if (this.gotoBottom && this.scroller.current) {
-      this.scroller.current.gotoBottom();
+    if (this.gotoBottom && scroller) {
+      scroller.gotoBottom();
       return this.gotoBottom = false;
     }
 
     if (this.checkForSnapping) {
       if (!threadMessagesPartialFetching && !threadGetMessageListByMessageIdFetching) {
-        this.scroller.current.checkForSnapping();
+        scroller.checkForSnapping();
         this.checkForSnapping = false;
         dispatch(threadTrimDownHistory());
+      }
+    }
+  }
+
+  _fetchMore() {
+    const {
+      threadMessages,
+      threadMessagesPartialFetching
+    } = this.props;
+    const {fetching, hasNext, hasPrevious} = threadMessages;
+    const scroller = this.scroller?.current;
+    if (!fetching && !threadMessagesPartialFetching) {
+      if (hasPrevious || hasNext) {
+        if (scroller) {
+          const scrollerInfo = scroller.getInfo();
+          if (scrollerInfo.scrollHeight <= scrollerInfo.offsetHeight) {
+            return this.onScrollTopThreshold();
+          }
+        }
       }
     }
   }
@@ -591,17 +619,17 @@ export default class MainMessages extends Component {
     } = this.props;
     const {highLightMessage, bottomButtonShowing, unreadBar, newMessageUnreadCount} = this.state;
     let {messages, fetching, hasPrevious, hasNext} = threadMessages;
-/*    messages = messages.filter(message => {
-      const callHistory = message.callHistory;
-      if (!callHistory) {
-        return true;
-      }
-      const isGroupThread = isGroup(thread);
-      if (!isGroupThread) {
-        return [7, 2, 3, 4].indexOf(callHistory.status) > -1;
-      }
-      return [7].indexOf(callHistory.status) > -1;
-    });*/
+    /*    messages = messages.filter(message => {
+          const callHistory = message.callHistory;
+          if (!callHistory) {
+            return true;
+          }
+          const isGroupThread = isGroup(thread);
+          if (!isGroupThread) {
+            return [7, 2, 3, 4].indexOf(callHistory.status) > -1;
+          }
+          return [7].indexOf(callHistory.status) > -1;
+        });*/
     const MainMessagesMessageContainerClassNames = (isMessageByMe, messageType) => classnames({
       [style.MainMessages__MessageContainer]: true,
       [style["MainMessages__MessageContainer--left"]]: !isMessageByMe,

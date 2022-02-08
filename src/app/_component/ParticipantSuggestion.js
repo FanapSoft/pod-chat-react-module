@@ -182,8 +182,11 @@ export default class extends Component {
       }
     ;
     if (keyCode in actionMapping) {
-      evt.preventDefault();
-      actionMapping[`${keyCode}`]()
+      const {participants} = this.state;
+      if (participants.length) {
+        evt.preventDefault();
+        actionMapping[`${keyCode}`]();
+      }
     }
   }
 
