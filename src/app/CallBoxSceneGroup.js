@@ -52,6 +52,7 @@ export default class CallBoxSceneGroup extends Component {
     const fullScreenCondition = chatCallBoxShowing.showing === CHAT_CALL_BOX_FULL_SCREEN || mobileCheck();
     const isVideoCallResult = isVideoCall(call);
     const isVideoIncluded = isVideoCallResult || isParticipantVideoTurnedOn(call, chatCallParticipantList);
+    const isScreenShareResult = isScreenShare(call);
     const {thread, contact} = chatCallBoxShowing;
 
     const avatarContainerClassNames = classnames({
@@ -69,9 +70,9 @@ export default class CallBoxSceneGroup extends Component {
       isVideoIncluded,
       isVideoCall: isVideoCallResult
     };
-    if ((isScreenShare(call) || isVideoIncluded) && !incomingCondition && startedCondition) {
+    if ((isScreenShareResult || isVideoIncluded) && !incomingCondition && startedCondition) {
       return <>
-        <CallBoxSceneGroupToaster isVideoIncluded={isVideoIncluded}/>
+        <CallBoxSceneGroupToaster isVideoIncluded={isVideoIncluded || isScreenShareResult}/>
         <CallBoxSceneGroupVideo {...commonArgs}/>
       </>
     }

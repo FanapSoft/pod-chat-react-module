@@ -153,7 +153,6 @@ export const chatCallParticipantListReducer = (state = {
       return {...state, ...stateGenerator(PENDING, {participants: state.participants})};
     case CHAT_CALL_PARTICIPANT_LIST_PRELOAD:
     case CHAT_CALL_PARTICIPANT_LIST(SUCCESS):
-      console.log(action.payload)
       return {
         ...state, ...stateGenerator(SUCCESS, {participants: action.payload})
       };

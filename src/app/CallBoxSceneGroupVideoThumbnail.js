@@ -64,7 +64,9 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
 
     if (isScreenShare) {
       const tag = document.getElementById('video-screenShare');
-      return injectVideo(tag, "screenShare");
+      return setTimeout(() => {
+        injectVideo(tag, "screenShare");
+      }, 1000);
     }
 
     const goForInjectingCondition = ((sceneParticipant && nowSceneParticipant) && (sceneParticipant.id !== nowSceneParticipant.id)) || !sceneParticipant;
@@ -91,7 +93,9 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
       const tag = document.getElementById('video-screenShare');
 
       if (tag) {
-        injectVideo(tag, "screenShare");
+        setTimeout(() => {
+          injectVideo(tag, "screenShare");
+        }, 1000);
       }
     }
 
@@ -132,9 +136,8 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
     let filterParticipants = [];
     if (uiElements) {
       filterParticipants = chatCallParticipantList.filter(participant => {
-        console.log(participant)
         const commonCondition = (isScreenShare || participant.id !== sceneParticipant.id);
-        if(isVideoCallResult) {
+        if (isVideoCallResult) {
           return (participant.videoMute || uiElements[participant.id]) && commonCondition
         }
         return uiElements[participant.id]?.video && commonCondition
@@ -173,8 +176,9 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
                          style={{margin: "3px 4px"}}/>
           }
         </Container>
-        <Container id={isScreenShare ? "video-screenShare" : `video-${sceneParticipant ? sceneParticipant.id : "video-scene"}`}
-                   className={style.CallBoxSceneGroupVideoThumbnail__CamVideoContainer}/>
+        <Container
+          id={isScreenShare ? "video-screenShare" : `video-${sceneParticipant ? sceneParticipant.id : "video-scene"}`}
+          className={style.CallBoxSceneGroupVideoThumbnail__CamVideoContainer}/>
         {sceneParticipant && sceneParticipant.videoMute && !isScreenShare &&
         <Container center>
           <Text invert size="xs">{strings.userMutedTheVideo}</Text>

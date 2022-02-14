@@ -132,6 +132,12 @@ export const chatSetInstance = config => {
           case THREAD_PARTICIPANTS_LIST_CHANGE:
           case THREAD_LEAVE_PARTICIPANT:
           case THREADS_LIST_CHANGE:
+            if (type === THREAD_LEAVE_PARTICIPANT) {
+              dispatch({
+                type: THREAD_CHANGED,
+                payload: thread.result.thread
+              });
+            }
             return dispatch({
               type: type,
               payload:

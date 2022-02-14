@@ -16,7 +16,7 @@ function renderPodchat(token) {
     <Provider store={store}>
       <BrowserRouter>
         <SupportModule>
-          <Index token={token}  {...serverConfig(true)} onRetryHook={e => {
+          <Index token={token}  {...serverConfig()} onRetryHook={e => {
             return retry();
           }}/>
         </SupportModule>

@@ -140,8 +140,6 @@ export default class CallBoxSceneGroupVideo extends Component {
       return uiElements[participant.id]?.video;
     });
 
-    console.log(filterParticipants)
-
     function buildRowColumn(index, columnException, toColumnException, rowException, rowToException) {
       const workingIndex = index + 1;
       const row = rowException || Math.ceil(workingIndex / 2);
