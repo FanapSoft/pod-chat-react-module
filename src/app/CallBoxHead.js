@@ -30,7 +30,14 @@ import {
   CHAT_CALL_STATUS_STARTED
 } from "../constants/callModes";
 import strings from "../constants/localization";
-import {isGroup, isScreenShare, isScreenShareOwnerIsMe, isVideoCall, mobileCheck} from "../utils/helpers";
+import {
+  isGroup,
+  isParticipantVideoTurnedOn,
+  isScreenShare,
+  isScreenShareOwnerIsMe,
+  isVideoCall,
+  mobileCheck
+} from "../utils/helpers";
 import {chatCallGroupSettingsShowingReducer} from "../reducers/chatReducer";
 
 window.calltimer = 0;
@@ -38,7 +45,8 @@ window.calltimer = 0;
 @connect(store => {
   return {
     user: store.user.user,
-    chatCallStatus: store.chatCallStatus
+    chatCallStatus: store.chatCallStatus,
+    chatCallParticipantList: store.chatCallParticipantList.participants
   }
 })
 export default class CallBoxHead extends Component {
@@ -106,13 +114,13 @@ export default class CallBoxHead extends Component {
   }
 
   render() {
-    const {chatCallStatus, thread, chatCallBoxShowing, user} = this.props;
+    const {chatCallStatus, thread, chatCallBoxShowing, user, chatCallParticipantList} = this.props;
     const {status, call} = chatCallStatus;
     const incomingCondition = status === CHAT_CALL_STATUS_INCOMING;
     const callStarted = status === CHAT_CALL_STATUS_STARTED;
     const fullScreenCondition = chatCallBoxShowing.showing === CHAT_CALL_BOX_FULL_SCREEN || mobileCheck();
     const isMobileCondition = mobileCheck();
-    const isVideoCallBool = (isVideoCall(call) || (isScreenShare(call) && (!isScreenShareOwnerIsMe(call.screenShare, user) || isGroup(thread))));
+    const isVideoCallBool = ((isVideoCall(call) || isParticipantVideoTurnedOn(call, chatCallParticipantList)) || (isScreenShare(call) && (!isScreenShareOwnerIsMe(call.screenShare, user) || isGroup(thread))));
     const accentTextColorCondition = isVideoCallBool && callStarted ? "accent" : "";
     const invertTextColorCondition = (fullScreenCondition && !incomingCondition && !isVideoCallBool) || (isVideoCallBool && fullScreenCondition && !incomingCondition && !callStarted);
     return <Container className={style.CallBoxHead}>

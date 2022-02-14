@@ -6,7 +6,7 @@ import {threadCreateWithExistThread, threadGoToMessageId} from "../actions/threa
 import {
   chatAcceptCall,
   chatAudioPlayer,
-  chatCallBoxShowing, chatCallMuteParticipants,
+  chatCallBoxShowing, chatCallMuteParticipants, chatCallParticipantListChange,
   chatCallStatus, chatCallTurnOffVideo, chatCallTurnOnVideo, chatCallUnMuteParticipants,
   chatRejectCall
 } from "../actions/chatActions";
@@ -31,12 +31,19 @@ import {
 
 //styling
 import style from "../../styles/app/CallBoxControlSet.scss";
-import {getMessageMetaData, isScreenShare, isScreenShareOwnerIsMe, isVideoCall, mobileCheck} from "../utils/helpers";
+import {
+  getMessageMetaData,
+  isParticipantVideoTurnedOn,
+  isScreenShare,
+  isScreenShareOwnerIsMe,
+  isVideoCall,
+  mobileCheck
+} from "../utils/helpers";
 import {
   CALL_DIV_ID, CHAT_CALL_BOX_COMPACTED, CHAT_CALL_BOX_FULL_SCREEN,
   CHAT_CALL_BOX_NORMAL,
   CHAT_CALL_STATUS_DIVS,
-  CHAT_CALL_STATUS_INCOMING,
+  CHAT_CALL_STATUS_INCOMING, CHAT_CALL_STATUS_OUTGOING,
   CHAT_CALL_STATUS_STARTED
 } from "../constants/callModes";
 import classnames from "classnames";
@@ -64,58 +71,61 @@ export default class CallBoxControlSet extends Component {
     this.onMoreActionClick = this.onMoreActionClick.bind(this);
     this.state = {
       mic: true,
-      cam: true,
+      cam: false,
       moreSettingShow: false
     }
   }
 
   componentDidMount() {
     const {user, chatCallParticipantList, chatCallStatus} = this.props;
+    const {call} = chatCallStatus;
     if (chatCallParticipantList.length) {
       const participant = chatCallParticipantList.find(e => e.id === user.id);
 
       if (participant) {
-        const {mic, volume} = this.state;
-        if (participant.mute) {
-          if (mic) {
-            this.setState({
-              mic: false
-            });
-          }
-        }
-
-        if (chatCallStatus && chatCallStatus.call) {
-          const {uiRemoteAudio} = chatCallStatus.call;
-          if (volume && uiRemoteAudio) {
-            if (uiRemoteAudio.muted) {
-              this.setState({
-                volume: false
-              });
-            }
-          }
-        }
+        this.setState({
+          cam: isVideoCall(call) ? participant.video === undefined ? true : participant.video : participant.video,
+          mic: !participant.mute
+        });
       }
     }
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    const {chatCallStatus, dispatch} = this.props;
-    const {chatCallStatus: oldChatCallStatus} = prevProps;
+    const {user, chatCallStatus, dispatch} = this.props;
+    const {cam} = this.state;
+    const {chatCallParticipantList: oldChatCallParticipantList, chatCallStatus: oldChatCallStatus} = prevProps;
     const {status: oldStatus} = oldChatCallStatus;
-    const {status} = chatCallStatus;
+    const {status, call} = chatCallStatus;
     if (oldStatus !== status) {
-      if (status === CHAT_CALL_STATUS_STARTED) {
-        const {volume, mic} = this.state;
-        const {callId, uiRemoteAudio} = chatCallStatus.call;
-        const {user} = this.props;
-        if (!mic) {
-          dispatch(chatCallMuteParticipants(callId, [user.id]));
-        }
-        if (!volume) {
-          if (uiRemoteAudio) {
-            uiRemoteAudio.muted = true;
+      if (oldStatus === CHAT_CALL_STATUS_OUTGOING) {
+        if (status === CHAT_CALL_STATUS_STARTED) {
+          const {mic, cam} = this.state;
+          const {callId} = call;
+          const {user} = this.props;
+          const timeoutCount = 500;
+          if (!mic) {
+            setTimeout(() => dispatch(chatCallMuteParticipants(callId, [user.id])), timeoutCount);
+          }
+          if (isVideoCall(call)) {
+            if (!cam) {
+              setTimeout(() => dispatch(chatCallTurnOffVideo(user.id)), timeoutCount);
+            }
+          } else {
+            if (cam) {
+              setTimeout(() => dispatch(chatCallTurnOnVideo(user.id)), timeoutCount);
+            }
           }
         }
+      } else if (oldStatus === CHAT_CALL_STATUS_INCOMING) {
+        if (!cam && this.lastAcceptedCallIsVideo) {
+          this.setState({
+            cam: this.lastAcceptedCallIsVideo
+          });
+          setTimeout(()=> dispatch(chatCallParticipantListChange([{id: user.id, video: true}])) ,1000)
+
+        }
+        this.lastAcceptedCallIsVideo = false;
       }
     }
   }
@@ -128,11 +138,12 @@ export default class CallBoxControlSet extends Component {
     stopRingtone(status);
   }
 
-  onAcceptCallClick(e) {
-    e.stopPropagation();
+  onAcceptCallClick(isVideoCall, e) {
+    (e || isVideoCall).stopPropagation();
     const {dispatch, chatCallStatus, stopRingtone} = this.props;
     const {call, status} = chatCallStatus;
-    dispatch(chatAcceptCall(call));
+    dispatch(chatAcceptCall(call, isVideoCall));
+    this.lastAcceptedCallIsVideo = isVideoCall === true;
     stopRingtone(status);
   }
 
@@ -142,10 +153,11 @@ export default class CallBoxControlSet extends Component {
     const currentState = this.state.mic;
     const nextState = !currentState;
     const {chatCallStatus, user, dispatch} = this.props;
+    const {status, call} = chatCallStatus;
     if (nextState) {
-      dispatch(chatCallUnMuteParticipants(chatCallStatus.call.callId, [user.id]));
+      dispatch(chatCallUnMuteParticipants(call.callId, [user.id], status !== CHAT_CALL_STATUS_STARTED));
     } else {
-      dispatch(chatCallMuteParticipants(chatCallStatus.call.callId, [user.id]));
+      dispatch(chatCallMuteParticipants(call.callId, [user.id], status !== CHAT_CALL_STATUS_STARTED));
     }
     this.setState({
       mic: nextState,
@@ -157,10 +169,11 @@ export default class CallBoxControlSet extends Component {
     const currentState = this.state.cam;
     const nextState = !currentState;
     const {chatCallStatus, user, dispatch} = this.props;
+    const {status} = chatCallStatus;
     if (nextState) {
-      dispatch(chatCallTurnOnVideo());
+      dispatch(chatCallTurnOnVideo(user.id, status !== CHAT_CALL_STATUS_STARTED));
     } else {
-      dispatch(chatCallTurnOffVideo());
+      dispatch(chatCallTurnOffVideo(user.id, status !== CHAT_CALL_STATUS_STARTED));
     }
     this.setState({
       cam: nextState,
@@ -181,6 +194,7 @@ export default class CallBoxControlSet extends Component {
     const {showing: callBoxShowingType} = chatCallBoxShowing;
     const showScreenShareIconCondition = isScreenShare(call) && isScreenShareOwnerIsMe(call?.screenShare, user);
     const incomingCondition = status === CHAT_CALL_STATUS_INCOMING;
+    const isCallStarted = status === CHAT_CALL_STATUS_STARTED;
     const fullScreenCondition = callBoxShowingType === CHAT_CALL_BOX_FULL_SCREEN || (mobileCheck() && callBoxShowingType !== CHAT_CALL_BOX_COMPACTED);
     const classNames = classnames({
       [style.CallBoxControlSet]: true,
@@ -208,20 +222,20 @@ export default class CallBoxControlSet extends Component {
         <MdCall size={style.iconSizeMd} style={{margin: "7px 5px"}}/>
       </ButtonFloating>
       {incomingCondition &&
-      <ButtonFloating onClick={this.onAcceptCallClick} size={buttonSize || "sm"} className={callAcceptClassNames}>
-        {isVideoCall(call) ?
-          <MdVideocam size={style.iconSizeMd} style={{margin: "7px 5px"}}/>
-          :
+      <>
+        <ButtonFloating size={buttonSize || "sm"} className={callAcceptClassNames} onClick={this.onAcceptCallClick}>
           <MdCall size={style.iconSizeMd} style={{margin: "7px 5px"}}/>
-        }
-      </ButtonFloating>
+        </ButtonFloating>
+        <ButtonFloating size={buttonSize || "sm"} className={callAcceptClassNames}
+                        onClick={this.onAcceptCallClick.bind(this, true)}>
+          <MdVideocam size={style.iconSizeMd} style={{margin: "7px 5px"}}/>
+        </ButtonFloating>
+      </>
       }
       {!incomingCondition &&
       <>
         {
-          isVideoCall(call) &&
           <ButtonFloating onClick={this.onCamClick} size={buttonSize || "sm"} className={micOffOrOnClassNames}>
-
             {cam ?
               <MdVideocam size={style.iconSizeMd} style={{margin: "7px 5px"}}/> :
               <MdVideocamOff size={style.iconSizeMd} style={{margin: "7px 5px"}}/>

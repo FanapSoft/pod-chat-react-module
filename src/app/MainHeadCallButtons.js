@@ -48,11 +48,11 @@ export default class MainHeadCallButtons extends Component {
 
   onJoinCall() {
     const {thread, dispatch} = this.props;
-    dispatch(chatAcceptCall(thread.call, true, thread));
+    dispatch(chatAcceptCall(thread.call, false,true, thread));
   }
 
   _groupCall(type) {
-    const {participants, thread, user, dispatch} = this.props;
+    const {participants, thread, dispatch} = this.props;
     if (thread.participantCount > MAX_GROUP_CALL_COUNT) {
       return this.makeGlobalCallRef.current.onMakeCall(this._lastGroupCallRequest);
     }

@@ -31,7 +31,6 @@ import strings from "../constants/localization";
 
 @connect(store => {
   return {
-    chatCallParticipantList: store.chatCallParticipantList.participants,
     chatCallGroupSettingsShowing: store.chatCallGroupSettingsShowing,
     chatCallGroupVideoViewMode: store.chatCallGroupVideoViewMode
   };
@@ -80,7 +79,7 @@ export default class CallBoxSceneGroupVideo extends Component {
       const tag = document.getElementById(id);
       if (tag) {
         if (tag.firstChild) {
-          if(participant.videoMute) {
+          if (participant.videoMute) {
             tag.querySelector('video') && tag.querySelector('video').remove();
           }
         } else {
@@ -130,7 +129,18 @@ export default class CallBoxSceneGroupVideo extends Component {
     if (!uiElements) {
       return {grid, filterParticipants: []};
     }
-    const filterParticipants = chatCallParticipantList.filter(participant => uiElements[participant.id]);
+    let filterParticipants = chatCallParticipantList.filter(participant => {
+      if (isVideoCall(call)) {
+        if(participant.videoMute) {
+          return true
+        } else {
+          return uiElements[participant.id]?.video;
+        }
+      }
+      return uiElements[participant.id]?.video;
+    });
+
+    console.log(filterParticipants)
 
     function buildRowColumn(index, columnException, toColumnException, rowException, rowToException) {
       const workingIndex = index + 1;
@@ -195,7 +205,9 @@ export default class CallBoxSceneGroupVideo extends Component {
       chatCallBoxShowing,
       user,
       chatCallParticipantList,
-      chatCallGroupSettingsShowing
+      chatCallGroupSettingsShowing,
+      isVideoIncluded,
+      isVideoCall
     } = this.props;
     const {groupVideoCallMode, groupVideoCallThumbnailParticipant} = this.state;
     const fullScreenCondition = chatCallBoxShowing.showing === CHAT_CALL_BOX_FULL_SCREEN;
@@ -211,8 +223,9 @@ export default class CallBoxSceneGroupVideo extends Component {
       [style["CallBoxSceneGroupVideo__Grid--fullScreen"]]: fullScreenCondition
     });
 
+    const {call} = chatCallStatus;
+
     const isScreenShareResult = isScreenShare(chatCallStatus.call);
-    const isVideoCalling = isVideoCall(chatCallStatus.call);
 
     return <Container className={classNames}>
       {!isScreenShareResult && groupVideoCallMode === GROUP_VIDEO_CALL_VIEW_MODE.GRID_VIEW ?
@@ -223,30 +236,35 @@ export default class CallBoxSceneGroupVideo extends Component {
                        onClick={this.onGridSellClick.bind(this, participant)}
                        ref={this.remoteVideoRef}
                        style={{gridArea: grid.itemsCell[index].area}}>
-              <Container className={style.CallBoxSceneGroupVideo__MuteContainer}>
-                {participant && participant.mute &&
-                <MdMicOff size={style.iconSizeXs}
-                          color={style.colorAccent}
-                          style={{margin: "3px 4px"}}/>
+              {isVideoCall &&
+              <>
+                <Container className={style.CallBoxSceneGroupVideo__MuteContainer}>
+                  {participant && participant.mute &&
+                  <MdMicOff size={style.iconSizeXs}
+                            color={style.colorAccent}
+                            style={{margin: "3px 4px"}}/>
+                  }
+                  {participant && participant.videoMute &&
+                  <MdVideocamOff size={style.iconSizeXs}
+                                 color={style.colorAccent}
+                                 style={{margin: "3px 4px"}}/>
+                  }
+                </Container>
+                {(participant && participant.videoMute) &&
+                <Container center centerTextAlign>
+                  <Text invert size="xs">{strings.userMutedTheVideo}</Text>
+                </Container>
                 }
-                {participant && participant.videoMute &&
-                <MdVideocamOff size={style.iconSizeXs}
-                               color={style.colorAccent}
-                               style={{margin: "3px 4px"}}/>
-                }
-              </Container>
-              <Container id={`video-${participant.id}`} className={style.CallBoxSceneGroupVideo__CamVideoContainer}/>
-              {participant && participant.videoMute &&
-              <Container center>
-                <Text invert size="xs">{strings.userMutedTheVideo}</Text>
-              </Container>
+              </>
               }
+              <Container id={`video-${participant.id}`} className={style.CallBoxSceneGroupVideo__CamVideoContainer}/>
             </Container>
           )}
         </Container> :
         <CallBoxSceneGroupVideoThumbnail participant={groupVideoCallThumbnailParticipant}
                                          isScreenShare={isScreenShareResult}
-                                         isVideoCall={isVideoCalling}
+                                         isVideoIncluded={isVideoIncluded}
+                                         isVidelCall={isVideoCall}
                                          chatCallStatus={chatCallStatus}
                                          chatCallBoxShowing={chatCallBoxShowing}
                                          injectVideo={this._injectVideo.bind(this)}

@@ -35,7 +35,7 @@ import {
 import style from "../../styles/app/CallBoxControlSetMore.scss";
 import {
   getMessageMetaData,
-  isGroup, isRecording, isRecordingOwnerIsMe,
+  isGroup, isParticipantVideoTurnedOn, isRecording, isRecordingOwnerIsMe,
   isScreenShare,
   isScreenShareOwnerIsMe,
   isVideoCall,
@@ -137,7 +137,7 @@ export default class CallBoxControlSetMore extends Component {
   }
 
   render() {
-    const {chatCallStatus, user} = this.props;
+    const {chatCallStatus, user, chatCallParticipantList} = this.props;
     const {ringToneSound, callToneSound, groupVideoCallMode} = this.state;
     const {status, call} = chatCallStatus;
     const isScreenShareCall = isScreenShare(call);
@@ -156,7 +156,7 @@ export default class CallBoxControlSetMore extends Component {
 
       <ModalBody>
         <List>
-          {(isGroupCall && isVideoCall(call)) &&
+          {(isGroupCall && (isVideoCall(call) || isParticipantVideoTurnedOn(call, chatCallParticipantList))) &&
           <ListItem selection invert onSelect={!isScreenShareCall && this.onViewModeClick}>
 
             <Container className={settingItemClassNames}>

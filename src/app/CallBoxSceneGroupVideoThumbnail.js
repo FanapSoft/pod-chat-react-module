@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
 import classnames from "classnames";
-import {avatarNameGenerator, avatarUrlGenerator, getMessageMetaData, mobileCheck} from "../utils/helpers";
+import {avatarNameGenerator, avatarUrlGenerator, getMessageMetaData, isVideoCall, mobileCheck} from "../utils/helpers";
 import {
   CALL_DIV_ID, CALL_SETTING_COOKIE_KEY_NAME,
   CALL_SETTINGS_CHANGE_EVENT,
@@ -57,7 +57,7 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
       participant,
       chatCallParticipantList,
       injectVideo,
-      isVideoCall
+      isVideoIncluded
     } = this.props;
 
     sceneParticipant = sceneParticipant || participant;
@@ -74,7 +74,7 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
         return;
       }
       const tag = document.getElementById(`video-${nowSceneParticipant.id}`);
-      if (isVideoCall) {
+      if (isVideoIncluded) {
         tag.innerHTML = "";
         traverseOverContactForInjecting();
       }
@@ -116,10 +116,10 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
       participant,
       chatCallBoxShowing,
       isScreenShare,
-      isVideoCall
+      isVideoIncluded,
+
     } = this.props;
     let {sceneParticipant} = this.state;
-
     const fullScreenCondition = chatCallBoxShowing.showing === CHAT_CALL_BOX_FULL_SCREEN;
     sceneParticipant = sceneParticipant || participant;
     sceneParticipant = sceneParticipant && sceneParticipant.id ? sceneParticipant : chatCallParticipantList.find(partcipant => partcipant.id === sceneParticipant);
@@ -127,10 +127,18 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
       sceneParticipant = chatCallParticipantList && chatCallParticipantList[0];
     }
     const {call} = chatCallStatus;
+    const isVideoCallResult = isVideoCall(call)
     const {uiElements} = call;
     let filterParticipants = [];
     if (uiElements) {
-      filterParticipants = chatCallParticipantList.filter(participant => uiElements[participant.id] && (isScreenShare || participant.id !== sceneParticipant.id));
+      filterParticipants = chatCallParticipantList.filter(participant => {
+        console.log(participant)
+        const commonCondition = (isScreenShare || participant.id !== sceneParticipant.id);
+        if(isVideoCallResult) {
+          return (participant.videoMute || uiElements[participant.id]) && commonCondition
+        }
+        return uiElements[participant.id]?.video && commonCondition
+      });
     }
     if (!sceneParticipant) {
       sceneParticipant = {};
@@ -154,12 +162,12 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
     return <Container className={classNames}>
       <Container className={sceneClassNames}>
         <Container className={style.CallBoxSceneGroupVideoThumbnail__MuteContainer}>
-          {sceneParticipant && sceneParticipant.mute &&
+          {sceneParticipant && sceneParticipant.mute && !isScreenShare &&
           <MdMicOff size={style.iconSizeXs}
                     color={style.colorAccent}
                     style={{margin: "3px 4px"}}/>
           }
-          {sceneParticipant && sceneParticipant.videoMute &&
+          {sceneParticipant && sceneParticipant.videoMute && !isScreenShare &&
           <MdVideocamOff size={style.iconSizeXs}
                          color={style.colorAccent}
                          style={{margin: "3px 4px"}}/>
@@ -167,13 +175,13 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
         </Container>
         <Container id={isScreenShare ? "video-screenShare" : `video-${sceneParticipant ? sceneParticipant.id : "video-scene"}`}
                    className={style.CallBoxSceneGroupVideoThumbnail__CamVideoContainer}/>
-        {sceneParticipant && sceneParticipant.videoMute &&
+        {sceneParticipant && sceneParticipant.videoMute && !isScreenShare &&
         <Container center>
           <Text invert size="xs">{strings.userMutedTheVideo}</Text>
         </Container>
         }
       </Container>
-      {isVideoCall &&
+      {isVideoIncluded &&
       <Container className={listClassNames}>
         <Container className={style.CallBoxSceneGroupVideoThumbnail__ListContainer}>
           <Container className={style.CallBoxSceneGroupVideoThumbnail__ListScroller}>

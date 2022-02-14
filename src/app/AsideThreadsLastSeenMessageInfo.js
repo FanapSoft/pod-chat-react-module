@@ -20,7 +20,7 @@ export default function ({isGroup, isChannel, time, lastMessageVO, draftMessage,
   const {call} = thread
   const onJoinCall = e => {
     e.stopPropagation();
-    dispatch(chatAcceptCall(thread.call, true, thread));
+    dispatch(chatAcceptCall(thread.call, false,true, thread));
   }
   return <Container topLeft className={style.AsideThreadsLastSeenMessageInfo}>
     {

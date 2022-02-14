@@ -6,7 +6,7 @@ import {connect} from "react-redux";
 //components
 
 //styling
-import {isScreenShare, isScreenShareOwnerIsMe, isVideoCall} from "../utils/helpers";
+import {isParticipantVideoTurnedOn, isScreenShare, isScreenShareOwnerIsMe, isVideoCall} from "../utils/helpers";
 import {CHAT_CALL_STATUS_INCOMING, CHAT_CALL_STATUS_OUTGOING} from "../constants/callModes";
 import CallBoxScenePersonVideo from "./CallBoxScenePersonVideo";
 import CallBoxScenePersonAudio from "./CallBoxScenePersonAudio";
@@ -29,15 +29,18 @@ export default class CallBoxScenePerson extends Component {
     const {status, call} = chatCallStatus;
     const isVideoCalling = isVideoCall(call);
     const isScreenSharing = isScreenShare(call);
+    const isVideoIncluded = isParticipantVideoTurnedOn(call, chatCallParticipantList);
     const incomingCondition = status === CHAT_CALL_STATUS_INCOMING;
     const outgoingCondition = status === CHAT_CALL_STATUS_OUTGOING;
     const commonArgs = {
       chatCallStatus,
       chatCallBoxShowing,
       user,
-      chatCallParticipantList
+      chatCallParticipantList,
+      isVideoIncluded,
+      isVideoCall: isVideoCalling
     };
-    return (isScreenSharing || isVideoCalling) && !incomingCondition && !outgoingCondition ?
+    return (isScreenSharing || isVideoCalling || isVideoIncluded) && !incomingCondition && !outgoingCondition ?
       <CallBoxScenePersonVideo {...commonArgs}/> :
       <CallBoxScenePersonAudio {...commonArgs}/>;
   }

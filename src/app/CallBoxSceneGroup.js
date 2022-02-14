@@ -9,7 +9,7 @@ import CallBoxSceneGroupVoice from "./CallBoxSceneGroupVoice";
 import {
   avatarNameGenerator,
   avatarUrlGenerator,
-  getMessageMetaData,
+  getMessageMetaData, isParticipantVideoTurnedOn,
   isScreenShare,
   isVideoCall,
   mobileCheck
@@ -34,7 +34,8 @@ import style from "../../styles/app/CallBoxSceneGroup.scss";
 
 @connect(store => {
   return {
-    user: store.user.user
+    user: store.user.user,
+    chatCallParticipantList: store.chatCallParticipantList.participants
   };
 })
 export default class CallBoxSceneGroup extends Component {
@@ -44,12 +45,13 @@ export default class CallBoxSceneGroup extends Component {
   }
 
   render() {
-    const {chatCallStatus, chatCallBoxShowing, user} = this.props;
+    const {chatCallStatus, chatCallBoxShowing, user, chatCallParticipantList} = this.props;
     const {status, call} = chatCallStatus;
     const incomingCondition = status === CHAT_CALL_STATUS_INCOMING;
     const startedCondition = status === CHAT_CALL_STATUS_STARTED;
     const fullScreenCondition = chatCallBoxShowing.showing === CHAT_CALL_BOX_FULL_SCREEN || mobileCheck();
     const isVideoCallResult = isVideoCall(call);
+    const isVideoIncluded = isVideoCallResult || isParticipantVideoTurnedOn(call, chatCallParticipantList);
     const {thread, contact} = chatCallBoxShowing;
 
     const avatarContainerClassNames = classnames({
@@ -60,19 +62,22 @@ export default class CallBoxSceneGroup extends Component {
     });
 
     const commonArgs = {
+      chatCallParticipantList,
       chatCallStatus,
       chatCallBoxShowing,
-      user
+      user,
+      isVideoIncluded,
+      isVideoCall: isVideoCallResult
     };
-    if ((isScreenShare(call) || isVideoCall(call)) && !incomingCondition && startedCondition) {
+    if ((isScreenShare(call) || isVideoIncluded) && !incomingCondition && startedCondition) {
       return <>
-        <CallBoxSceneGroupToaster isVideoCall={isVideoCallResult}/>
+        <CallBoxSceneGroupToaster isVideoIncluded={isVideoIncluded}/>
         <CallBoxSceneGroupVideo {...commonArgs}/>
       </>
     }
     return <Container className={style.CallBoxSceneGroup}>
       <CallBoxSceneGroupToaster isVideoCall={isVideoCallResult}/>
-      {!isVideoCallResult && !incomingCondition && <CallBoxSceneGroupVoice {...commonArgs}/>}
+      {!incomingCondition && <CallBoxSceneGroupVoice {...commonArgs}/>}
       <Container className={avatarContainerClassNames}>
         <Avatar cssClassNames={avatarClassName} inline={false}>
           <AvatarImage

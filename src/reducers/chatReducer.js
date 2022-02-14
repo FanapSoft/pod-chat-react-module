@@ -18,11 +18,6 @@ import {
   CHAT_CALL_BOX_SHOWING,
   CHAT_CALL_STATUS,
   CHAT_SELECT_PARTICIPANT_FOR_CALL_SHOWING,
-  THREAD_PARTICIPANT_GET_LIST,
-  THREAD_PARTICIPANTS_LIST_CHANGE,
-  THREAD_PARTICIPANT_GET_LIST_PARTIAL,
-  THREAD_PARTICIPANTS_REMOVED,
-  THREAD_LEAVE_PARTICIPANT,
   CHAT_CALL_PARTICIPANT_LIST,
   CHAT_CALL_PARTICIPANT_LIST_CHANGE,
   CHAT_CALL_PARTICIPANT_LIST_PRELOAD,
@@ -157,11 +152,11 @@ export const chatCallParticipantListReducer = (state = {
     case CHAT_CALL_PARTICIPANT_LIST(PENDING):
       return {...state, ...stateGenerator(PENDING, {participants: state.participants})};
     case CHAT_CALL_PARTICIPANT_LIST_PRELOAD:
-    case CHAT_CALL_PARTICIPANT_LIST(SUCCESS): {
+    case CHAT_CALL_PARTICIPANT_LIST(SUCCESS):
+      console.log(action.payload)
       return {
         ...state, ...stateGenerator(SUCCESS, {participants: action.payload})
       };
-    }
     case CHAT_CALL_PARTICIPANT_REMOVED:
     case CHAT_CALL_PARTICIPANT_LEFT:
       return {
@@ -199,9 +194,23 @@ export const chatCallParticipantListReducer = (state = {
 };
 
 export const chatCallStatusReducer = (state = {status: null, call: null}, action) => {
+  const call = state.call;
   switch (action.type) {
     case CHAT_CALL_STATUS:
       return action.payload;
+    case CHAT_CALL_PARTICIPANT_LEFT:
+    case CHAT_CALL_PARTICIPANT_LIST_CHANGE:
+      return {
+        ...state, ...stateGenerator(SUCCESS, {
+          call: {
+            ...call, otherClientDtoList:
+              updateStore(call.otherClientDtoList, action.payload, {
+                method: action.type === CHAT_CALL_PARTICIPANT_LIST_CHANGE ? listUpdateStrategyMethods.UPDATE : listUpdateStrategyMethods.REMOVE,
+                by: "userId",
+              })
+          }
+        })
+      };
     default:
       return state;
   }

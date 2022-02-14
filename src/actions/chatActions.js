@@ -216,7 +216,10 @@ export const chatSetInstance = config => {
             return dispatch(chatCallParticipantListChange(callParticipantStandardization(call)));
           case "TURN_OFF_VIDEO_CALL":
           case "TURN_ON_VIDEO_CALL":
-            return dispatch(chatCallParticipantListChange(callParticipantStandardization(call, {videoMute: type === "TURN_OFF_VIDEO_CALL"})));
+            return dispatch(chatCallParticipantListChange(callParticipantStandardization(call, {
+              video: type === "TURN_ON_VIDEO_CALL",
+              videoMute: type === "TURN_OFF_VIDEO_CALL"
+            })));
           case "RECEIVE_CALL":
             dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, call.conversationVO || {}, call.creatorVO));
             return dispatch(chatCallStatus(CHAT_CALL_STATUS_INCOMING, call));
@@ -494,22 +497,26 @@ export const chatCallStatus = (status = null, call = null) => {
   }
 };
 
-export const chatCallMuteParticipants = (callId, userIds) => {
+export const chatCallMuteParticipants = (callId, userIds, justChangeTheList = false) => {
   return (dispatch, getState) => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
-    chatSDK.muteCallParticipants(callId, userIds);
+    if (!justChangeTheList) {
+      chatSDK.muteCallParticipants(callId, userIds);
+    }
     dispatch(chatCallParticipantListChange(userIds.map(user => {
       return {id: user, mute: true}
     })));
   }
 };
 
-export const chatCallUnMuteParticipants = (callId, userIds) => {
+export const chatCallUnMuteParticipants = (callId, userIds, justChangeTheList = false) => {
   return (dispatch, getState) => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
-    chatSDK.unMuteCallParticipants(callId, userIds);
+    if (!justChangeTheList) {
+      chatSDK.unMuteCallParticipants(callId, userIds);
+    }
     dispatch(chatCallParticipantListChange(userIds.map(user => {
       return {id: user, mute: false}
     })));
@@ -605,11 +612,11 @@ export const chatCallParticipantListChange = participants => {
 };
 
 
-export const chatAcceptCall = (call, isJoin, thread) => {
+export const chatAcceptCall = (call, video = false, isJoin, thread) => {
   return (dispatch, getState) => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
-    const options = {joinCall: isJoin, video: call.type === 1, cameraPaused: call.type !== 1};
+    const options = {joinCall: isJoin, video, cameraPaused: call.type !== 1};
     dispatch(chatCallStatus(CHAT_CALL_STATUS_STARTED, call));
     if (isJoin) {
       const {call, ...other} = thread;
@@ -653,7 +660,7 @@ export const chatStartCall = (threadId, type, params) => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
     chatSDK.startCall(threadId, type, params);
-    dispatch(chatCallStatus(CHAT_CALL_STATUS_OUTGOING, null));
+    dispatch(chatCallStatus(CHAT_CALL_STATUS_OUTGOING, {type: type === "video" ? 1 : 0}));
   }
 };
 
@@ -695,23 +702,27 @@ export const chatCallEndScreenShare = () => {
   }
 };
 
-export const chatCallTurnOnVideo = callId => {
+export const chatCallTurnOnVideo = (userId, justChangeTheList) => {
   return (dispatch, getState) => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
-    if (state.chatCallStatus.call) {
-      chatSDK.turnOnVideoCall(state.chatCallStatus.call.callId);
+    const callId = state.chatCallStatus.call?.callId;
+    if (callId && !justChangeTheList) {
+      chatSDK.turnOnVideoCall(callId);
     }
+    dispatch(chatCallParticipantListChange([{id: userId, video: true}]));
   }
 };
 
-export const chatCallTurnOffVideo = () => {
+export const chatCallTurnOffVideo = (userId, justChangeTheList) => {
   return (dispatch, getState) => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
-    if (state.chatCallStatus.call) {
-      chatSDK.turnOffVideoCall(state.chatCallStatus.call.callId);
+    const callId = state.chatCallStatus.call?.callId;
+    if (callId && !justChangeTheList) {
+      chatSDK.turnOffVideoCall(callId);
     }
+    dispatch(chatCallParticipantListChange([{id: userId, video: false}]));
   }
 };
 

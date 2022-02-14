@@ -50,7 +50,7 @@ export default class CallBoxSceneGroup extends Component {
   render() {
     const classNames = classnames({
       [style.CallBoxSceneGroupToaster]: true,
-      [style["CallBoxSceneGroupToaster--VideoCall"]]: this.props.isVideoCall
+      [style["CallBoxSceneGroupToaster--VideoCall"]]: this.props.isVideoIncluded
     })
     return <ToastContainer
       enableMultiContainer

@@ -814,6 +814,26 @@ export function isVideoCall(call) {
   }
 }
 
+export function isParticipantVideoTurnedOn(call, callParticipant) {
+  if (!callParticipant && !call) {
+    return false;
+  }
+  const checker = (participants) => {
+    for (const participant of participants) {
+      if (participant.video) {
+        return true;
+      }
+    }
+    return false;
+  };
+  if (call?.otherClientDtoList) {
+    if (checker(call?.otherClientDtoList)) {
+      return true;
+    }
+  }
+  return checker(callParticipant);
+}
+
 export function isScreenShare(call) {
   if (call) {
     if (call.screenShare) {

@@ -10,8 +10,7 @@ export default class CallBoxSceneGroupVoice extends Component {
   }
 
   render() {
-    const {chatCallStatus, chatCallBoxShowing} = this.props;
-
+    const {chatCallBoxShowing} = this.props;
     return <CallBoxSceneGroupVoiceParticipants chatCallBoxShowing={chatCallBoxShowing}/>
   }
 }

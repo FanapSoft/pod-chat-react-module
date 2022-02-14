@@ -68,7 +68,7 @@ export default class CallBoxScenePersonVideo extends Component {
   }
 
   _injectVideos() {
-    const {user, chatCallStatus} = this.props;
+    const {user, chatCallStatus, isVideoCall, isVideoIncluded} = this.props;
     const {call} = chatCallStatus;
     const {uiElements} = call;
     if (uiElements) {
@@ -86,7 +86,7 @@ export default class CallBoxScenePersonVideo extends Component {
       if (isScreenSharing) {
         const remoteVideoInScreenSharingRef = ReactDOM.findDOMNode(this.remoteVideoInScreenSharingRef.current);
         fixInjectVideoTag(screenShareVideo, remoteVideoTag);
-        if (isVideoCall(call)) {
+        if (isVideoCall || isVideoIncluded) {
           fixInjectVideoTag(localVideo, localVideoTag)
           fixInjectVideoTag(remoteVideo, remoteVideoInScreenSharingRef)
         }
@@ -125,7 +125,14 @@ export default class CallBoxScenePersonVideo extends Component {
   }
 
   render() {
-    const {chatCallStatus, chatCallBoxShowing, user, chatCallParticipantList} = this.props;
+    const {
+      chatCallStatus,
+      chatCallBoxShowing,
+      user,
+      chatCallParticipantList,
+      isVideoCall,
+      isVideoIncluded
+    } = this.props;
     const {status, call} = chatCallStatus;
     const fullScreenCondition = chatCallBoxShowing.showing === CHAT_CALL_BOX_FULL_SCREEN || mobileCheck();
     const sideUserFromParticipantList = chatCallParticipantList.find(participant => user.id !== participant.id);
@@ -142,33 +149,41 @@ export default class CallBoxScenePersonVideo extends Component {
       [style["CallBoxScenePersonVideo__Cams--fullWidth"]]: fullScreenCondition && isScreenSharing
     });
 
+    const MuteFragment = () =>
+      <>
+        <Container className={style.CallBoxScenePersonVideo__MuteContainer}>
+          {sideUserFromParticipantList && sideUserFromParticipantList.mute &&
+          <MdMicOff size={style.iconSizeXs}
+                    color={style.colorAccent}
+                    style={{margin: "3px 4px"}}/>
+          }
+          {sideUserFromParticipantList && sideUserFromParticipantList.videoMute &&
+          <MdVideocamOff size={style.iconSizeXs}
+                         color={style.colorAccent}
+                         style={{margin: "3px 4px"}}/>
+          }
+
+        </Container>
+        {sideUserFromParticipantList && sideUserFromParticipantList.videoMute && !isScreenSharing &&
+        <Container center>
+          <Text invert size="xs">{strings.userMutedTheVideo}</Text>
+        </Container>
+        }
+      </>
+
+
     return <Container className={classNames}>
       <Container className={callBoxSceneCamContainerClassName}>
         <Container className={style.CallBoxScenePersonVideo__MainCam} ref={this.remoteVideoRef}>
-          <Container className={style.CallBoxScenePersonVideo__MuteContainer}>
-            {sideUserFromParticipantList && sideUserFromParticipantList.mute &&
-            <MdMicOff size={style.iconSizeXs}
-                      color={style.colorAccent}
-                      style={{margin: "3px 4px"}}/>
-            }
-            {sideUserFromParticipantList && sideUserFromParticipantList.videoMute &&
-            <MdVideocamOff size={style.iconSizeXs}
-                           color={style.colorAccent}
-                           style={{margin: "3px 4px"}}/>
-            }
-
-          </Container>
-          {sideUserFromParticipantList && sideUserFromParticipantList.videoMute &&
-          <Container center>
-            <Text invert size="xs">{strings.userMutedTheVideo}</Text>
-          </Container>
-          }
+          {!isScreenSharing && <MuteFragment/>}
         </Container>
-        {isVideoCall(call) &&
+        {(isVideoCall || isVideoIncluded) &&
         <Container className={style.CallBoxScenePersonVideo__SideCams}>
           <Container className={style.CallBoxScenePersonVideo__SideCam} ref={this.localVideoRef}/>
           {isScreenSharing &&
-          <Container className={style.CallBoxScenePersonVideo__SideCam} ref={this.remoteVideoInScreenSharingRef}/>
+          <Container relative className={style.CallBoxScenePersonVideo__SideCam} ref={this.remoteVideoInScreenSharingRef}>
+            {isScreenSharing && <MuteFragment/>}
+          </Container>
           }
         </Container>
         }
