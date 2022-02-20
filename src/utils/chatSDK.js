@@ -325,7 +325,9 @@ export default class ChatSDK {
           'thread_admin',
           'add_rule_to_user',
           'remove_role_from_user',
-          'edit_thread'
+          'read_thread',
+          'edit_thread',
+          'ownership'
         ]
       }],
 
