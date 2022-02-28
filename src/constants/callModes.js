@@ -17,7 +17,7 @@ export const GROUP_VIDEO_CALL_VIEW_MODE = {
   THUMBNAIL_VIEW: "THUMBNAIL_VIEW",
   GRID_VIEW: "GRID_VIEW"
 };
-export const MAX_GROUP_CALL_COUNT = 5;
+export const MAX_GROUP_CALL_COUNT = 15;
 export const MOCK_CONTACT = {
   auditor: false,
   blocked: false,

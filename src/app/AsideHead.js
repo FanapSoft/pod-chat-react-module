@@ -37,7 +37,9 @@ import Notification from "./Notification";
 //styling
 import style from "../../styles/app/AsidHead.scss";
 import utilsStlye from "../../styles/utils/utils.scss";
-import {CHAT_CALL_BOX_NORMAL, MAX_GROUP_CALL_COUNT} from "../constants/callModes";
+import {CHAT_CALL_BOX_NORMAL, MAX_GROUP_CALL_COUNT, SHOW_CALL_BUTTONS_EVENT} from "../constants/callModes";
+import Cookies from "js-cookie";
+import {SHOW_CALL_BUTTON} from "../constants/cookieKeys";
 
 const statics = {
   headMenuSize: 59
@@ -87,8 +89,14 @@ class AsideHead extends Component {
     this.state = {
       isOpen: false,
       reConnecting: false,
-      timeUntilReconnectTimer: null
+      timeUntilReconnectTimer: null,
+      showCallButton: Cookies.get(SHOW_CALL_BUTTON)
     };
+    window.addEventListener(SHOW_CALL_BUTTONS_EVENT, e => {
+      this.setState({
+        showCallButton: true
+      });
+    });
     this.container = React.createRef();
     this.onCloseMenu = this.onCloseMenu.bind(this);
     this.onOpenMenu = this.onOpenMenu.bind(this);
@@ -224,7 +232,7 @@ class AsideHead extends Component {
 
   render() {
     const {menuItems, chatState, chatInstance, smallVersion, chatSearchShowing, user} = this.props;
-    const {isOpen, reConnecting, timeUntilReconnectTimer} = this.state;
+    const {isOpen, reConnecting, timeUntilReconnectTimer, showCallButton} = this.state;
     const {isReconnecting, isConnected, isDisconnected} = socketStatus(chatState);
     const iconSize = style.iconSizeLg.replace("px", "");
     const iconMargin = `${(statics.headMenuSize - iconSize) / 2}px`;
@@ -300,9 +308,11 @@ class AsideHead extends Component {
           ))}
         </Dropdown>
         <Container centerLeft>
+          {showCallButton &&
           <Container inline cursor="pointer" className={style.AsideHead__MakeCallContainer}>
             <MakeGlobalCall/>
           </Container>
+          }
           <Container inline cursor="pointer" className={style.AsideHead__SearchContainer}
                      onClick={this.onChatSearchToggle}>
             {chatSearchShowing ?

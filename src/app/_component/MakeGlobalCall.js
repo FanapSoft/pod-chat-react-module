@@ -53,6 +53,9 @@ export default class MakeGlobalCall extends Component {
           const invitees = selectedParticipants.map(e => ({id: e.id, idType: mode === "CONTACT" ? "TO_BE_USER_CONTACT_ID" : "TO_BE_USER_ID"}));
           dispatch(chatStartGroupCall(null, invitees, callType || "VOICE", null, result => {
             selectedParticipants.push(user);
+            if (mode === "CONTACT") {
+              selectedParticipants.forEach(e => e.isContactCall = true);
+            }
             dispatch(chatCallGetParticipantList(null, selectedParticipants));
             dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, result));
             dispatch(threadCreateWithExistThread(result));

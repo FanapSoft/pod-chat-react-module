@@ -237,8 +237,14 @@ export const chatSetInstance = config => {
                 const oldThreadParticipant = getState().chatCallParticipantList.participants;
                 const newMap = oldThreadParticipant.map(participant => {
                   const found = participants.find(finded => {
-                    if (participant.id === finded.id) {
-                      return finded;
+                    if (participant.isContactCall) {
+                      if (participant.userId === finded.id) {
+                        return finded;
+                      }
+                    } else {
+                      if (participant.id === finded.id) {
+                        return finded;
+                      }
                     }
                   });
                   if (found) {
