@@ -7,7 +7,7 @@ import {
   chatCallAddParticipants,
   chatCallGetParticipantList,
   chatCallGroupSettingsShowing,
-  chatCallMuteParticipants,
+  chatCallMuteParticipants, chatCallParticipantListChange,
   chatCallRemoveParticipants,
   chatCallUnMuteParticipants,
   chatSelectParticipantForCallShowing
@@ -23,7 +23,7 @@ import {
   MdMicOff,
   MdClose,
   MdCallEnd,
-  MdAdd
+  MdAdd, MdPhone, MdAddCall
 } from "react-icons/md";
 import {Button} from "../../../pod-chat-ui-kit/src/button";
 import List from "../../../pod-chat-ui-kit/src/List";
@@ -37,6 +37,7 @@ import Gap from "raduikit/src/gap";
 import strings from "../constants/localization";
 import {THREAD_ADMIN} from "../constants/privilege";
 import Timer from "react-compound-timer";
+import {checkForParticipantsStatus} from "../utils/helpers";
 
 @connect(store => {
   return {
@@ -52,6 +53,7 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
     this.onAddMember = this.onAddMember.bind(this);
     this._selectParticipantForCallFooterFragment = this._selectParticipantForCallFooterFragment.bind(this);
     this.hideControl = this.hideControl.bind(this);
+    this.callAgain = this.callAgain.bind(this);
     this.state = {}
   }
 
@@ -75,6 +77,13 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
     dispatch(chatCallGroupSettingsShowing(false));
   }
 
+  callAgain(participant) {
+    const {chatCallParticipantList, chatCallStatus, dispatch} = this.props;
+    dispatch(chatCallAddParticipants(chatCallStatus.call.callId, [participant.contactId], [participant]));
+    dispatch(chatCallParticipantListChange([{...participant, callStatus: 0}]));
+    checkForParticipantsStatus.call(this, chatCallParticipantList);
+  }
+
   _selectParticipantForCallFooterFragment(mode, {selectedContacts, allContacts}) {
     const {dispatch, chatCallBoxShowing, chatCallStatus} = this.props;
     const {thread} = chatCallBoxShowing;
@@ -86,7 +95,10 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
           if (isMaximumCount) {
             return;
           }
-          const selectedParticipants = allContacts.filter(e => selectedContacts.indexOf(e.id) > -1).map(e => ({...e, id: e.userId}))
+          const selectedParticipants = allContacts.filter(e => selectedContacts.indexOf(e.id) > -1).map(e => ({
+            ...e,
+            id: e.userId
+          }))
           dispatch(chatSelectParticipantForCallShowing(false));
           dispatch(chatCallAddParticipants(chatCallStatus.call.callId, selectedContacts, selectedParticipants));
         }}>{strings.add}</Button>
@@ -157,8 +169,10 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
               <ContactListItem invert
                                contact={participant}
                                AvatarTextFragment={isCallOwner ? ({contact}) => {
-                                   return <Text size="xs" color={contact.callStatus === 6  ? "green" : "accent"} bold>
-                                     {contact.callStatus === 6 ? strings.callStarted : strings.callingWithNoType}
+                                   return <Text size="xs"
+                                                color={contact.callStatus === 6 ? "green" : contact.callStatus === 4 ? "red" : "accent"}
+                                                bold>
+                                     {contact.callStatus === 6 ? strings.callStarted : contact.callStatus === 4 ? strings.notAnswered : strings.callingWithNoType}
                                    </Text>
                                  }
                                  : null}
@@ -180,6 +194,15 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
                                          cursor: muteUnmutePermissionCondition ? "pointer" : "default"*/
                                        }}/*
                                        onClick={muteUnmutePermissionCondition && this.onParticipantMuteClick.bind(this, contact)}*/>
+                                       {contact.callStatus === 4 &&
+                                       <MdAddCall size={style.iconSizeSm}
+                                                  onClick={this.callAgain.bind(null, contact)}
+                                                  color={style.colorAccentDark}
+                                                  title={strings.callAgain}
+                                                  style={{
+                                                    cursor: "pointer",
+                                                    margin: "3px 4px",
+                                                  }}/>}
                                        {contact.mute ?
                                          <MdMicOff size={style.iconSizeSm}
                                                    color={style.colorGrayDark}
@@ -192,9 +215,10 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
                                                 style={{
                                                   margin: "3px 4px",
                                                 }}/>}
+
                                      </Container>
                                      }
-{/*                                     {isCallOwner &&
+                                     {/*                                     {isCallOwner &&
                                      <Container
                                        style={{margin: "3px 0", cursor: "pointer"}}
                                        color={style.colorRedDark}

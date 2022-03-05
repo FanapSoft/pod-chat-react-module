@@ -22,9 +22,9 @@ import {
   chatStartCall,
   chatStartGroupCall
 } from "../actions/chatActions";
-import {isGroup} from "../utils/helpers";
+import {checkForParticipantsStatus, isGroup} from "../utils/helpers";
 import {
-  CHAT_CALL_BOX_NORMAL,
+  CHAT_CALL_BOX_NORMAL, CHAT_CALL_STATUS_STARTED, DROPPING_OUTGOING_TIME_OUT,
   MAX_GROUP_CALL_COUNT
 } from "../constants/callModes";
 import {getParticipant} from "./ModalThreadInfoPerson";
@@ -48,7 +48,7 @@ export default class MainHeadCallButtons extends Component {
 
   onJoinCall() {
     const {thread, dispatch} = this.props;
-    dispatch(chatAcceptCall(thread.call, false,true, thread));
+    dispatch(chatAcceptCall(thread.call, false, true, thread));
   }
 
   _groupCall(type) {
@@ -59,6 +59,7 @@ export default class MainHeadCallButtons extends Component {
     dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, thread));
     dispatch(chatCallGetParticipantList(null, participants));
     dispatch(chatStartGroupCall(thread.id, null, type));
+    checkForParticipantsStatus.call(this, participants);
   }
 
   _p2pCall(callType) {

@@ -3,8 +3,6 @@ import {
   threadGetList,
   threadGoToMessageId,
   threadLeave,
-  threadMessageGetList,
-  threadMessageGetListPartial
 } from "./threadActions";
 import ChatSDK from "../utils/chatSDK";
 import {stateGeneratorState} from "../utils/storeHelper";
@@ -33,13 +31,10 @@ import {
   CHAT_SIGN_OUT_HOOK,
   THREAD_MESSAGE_PIN,
   MESSAGE_PINNED,
-  THREAD_GO_TO_MESSAGE,
   THREAD_GET_MESSAGE_LIST,
   THREAD_CREATE,
   THREAD_GET_MESSAGE_LIST_PARTIAL,
-  MESSAGE_SEND,
   CHAT_DESTROY,
-  THREAD_THUMBNAIL_UPDATE,
   CHAT_AUDIO_PLAYER,
   CHAT_AUDIO_RECORDER,
   CHAT_SUPPORT_MODE,
@@ -48,8 +43,6 @@ import {
   CHAT_CALL_STATUS,
   CHAT_SELECT_PARTICIPANT_FOR_CALL_SHOWING,
   CHAT_CALL_PARTICIPANT_LIST_PRELOAD,
-  THREAD_PARTICIPANT_GET_LIST_PARTIAL,
-  THREAD_PARTICIPANT_GET_LIST,
   CHAT_CALL_PARTICIPANT_LIST,
   CHAT_CALL_PARTICIPANT_LEFT,
   CHAT_CALL_PARTICIPANT_JOINED,
@@ -59,6 +52,7 @@ import {
 import {messageInfo} from "./messageActions";
 import {THREAD_HISTORY_LIMIT_PER_REQUEST} from "../constants/historyFetchLimits";
 import {
+  BUSY_DROP_TIME_OUT,
   CALL_DIV_ID,
   CHAT_CALL_BOX_NORMAL, CHAT_CALL_STATUS_DIVS,
   CHAT_CALL_STATUS_INCOMING,
@@ -90,21 +84,29 @@ function findInTyping(threadId, userId, remove) {
 }
 
 function resetChatCall(dispatch, call, callId, state) {
-  dispatch(chatCallStatus());
-  dispatch(chatCallGroupSettingsShowing(false));
-  if (call) {
-    if (call.uiLocalVideo) {
-      const {uiLocalVideo, uiLocalAudio} = call;
-      uiLocalVideo.remove();
-      uiLocalAudio.remove();
-      for (const remoteTag of call?.uiRemoteElements) {
-        remoteTag.uiRemoteAudio.remove();
-        remoteTag.uiRemoteVideo.remove();
+  let currentCall;
+  if (state) {
+    currentCall = state.chatCallStatus;
+  }
+  //if there is any live call check for matching call event otherwise dont do anything
+  if (!currentCall || (callId && (currentCall?.call?.id === callId || currentCall?.call?.callId === callId))) {
+    dispatch(chatCallBoxShowing(false));
+    dispatch(chatCallStatus());
+    dispatch(chatCallGroupSettingsShowing(false));
+    if (call) {
+      if (call.uiLocalVideo) {
+        const {uiLocalVideo, uiLocalAudio} = call;
+        uiLocalVideo.remove();
+        uiLocalAudio.remove();
+        for (const remoteTag of call?.uiRemoteElements) {
+          remoteTag.uiRemoteAudio.remove();
+          remoteTag.uiRemoteVideo.remove();
+        }
       }
     }
+    document.getElementById(CALL_DIV_ID).innerHTML = "";
+    dispatch(chatCallGetParticipantList());
   }
-  document.getElementById(CALL_DIV_ID).innerHTML = "";
-  dispatch(chatCallGetParticipantList());
   if (callId) {
     const found = state.threads.threads.find(thread => thread?.call?.id === callId);
     if (found) {
@@ -207,8 +209,9 @@ export const chatSetInstance = config => {
         });
       },
       onCallEvents: (call, type) => {
-        const oldCall = getState().chatCallStatus;
-        const user = getState().user.user;
+        const state = getState();
+        const oldCall = state.chatCallStatus;
+        const user = state.user.user;
         switch (type) {
           case "CALL_SESSION_CREATED":
             call.isOwner = true;
@@ -220,6 +223,8 @@ export const chatSetInstance = config => {
           case "CALL_PARTICIPANT_MUTE":
           case "CALL_PARTICIPANT_UNMUTE":
             return dispatch(chatCallParticipantListChange(callParticipantStandardization(call)));
+          case "REJECT_GROUP_CALL":
+            return dispatch(chatCallParticipantListChange(callParticipantStandardization([call])));
           case "TURN_OFF_VIDEO_CALL":
           case "TURN_ON_VIDEO_CALL":
             return dispatch(chatCallParticipantListChange(callParticipantStandardization(call, {
@@ -227,6 +232,10 @@ export const chatSetInstance = config => {
               videoMute: type === "TURN_OFF_VIDEO_CALL"
             })));
           case "RECEIVE_CALL":
+            if(oldCall && (oldCall?.call?.id || oldCall?.call?.callId || oldCall.status === CHAT_CALL_STATUS_OUTGOING)) {
+              const chatSDK = state.chatInstance.chatSDK;
+              return setTimeout( () => chatSDK.rejectCall(call.callId), BUSY_DROP_TIME_OUT);
+            }
             dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, call.conversationVO || {}, call.creatorVO));
             return dispatch(chatCallStatus(CHAT_CALL_STATUS_INCOMING, call));
           case "CALL_STARTED": {
@@ -260,7 +269,6 @@ export const chatSetInstance = config => {
             return dispatch(chatCallStatus(CHAT_CALL_STATUS_STARTED, {callId, ...oldCall.call, ...call}))
           }
           case "CALL_ENDED":
-            dispatch(chatCallBoxShowing(false));
             resetChatCall(dispatch, oldCall.call, call?.callId, getState());
             return;
           case "CALL_DIVS":
@@ -418,7 +426,18 @@ export const restoreChatState = () => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
 
+    const currentCall = state.chatCallStatus;
+
+    if (currentCall) {
+      if (currentCall.status === CHAT_CALL_STATUS_STARTED) {
+        if (currentCall.call.group) {
+          dispatch(chatCallGetParticipantList(currentCall.call.id || currentCall.call.callId));
+        }
+      }
+    }
+
     const threads = state.threads.threads;
+
     dispatch(threadGetList(0, threads.length, null, true)).then(threads => {
       dispatch({
         type: THREAD_GET_LIST(SUCCESS),
@@ -647,18 +666,26 @@ export const chatRejectCall = (call, status) => {
   return (dispatch, getState) => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
-    if (status === CHAT_CALL_STATUS_STARTED) {
-      chatSDK.endCall(call.callId);
-      const found = state.threads.threads.find(thread => thread.id === call.conversationVO.id);
-      if (found) {
-        call.id = call.callId;
-        dispatch({
-          type: THREAD_UPDATE,
-          payload: {call, ...found}
-        });
+    const callBackBuilder = () => {
+      if (call.group || call?.conversationVO?.group) {
+        const found = state.threads.threads.find(thread => thread.id === call.conversationVO.id);
+        if (found) {
+          call.id = call.callId;
+          dispatch({
+            type: THREAD_UPDATE,
+            payload: {call, ...found}
+          });
+        }
       }
+    }
+    if (status === CHAT_CALL_STATUS_STARTED) {
+      callBackBuilder();
+      chatSDK.endCall(call.callId);
     } else {
       if (call) {
+        if (status !== CHAT_CALL_STATUS_OUTGOING) {
+          callBackBuilder();
+        }
         chatSDK.rejectCall(call.callId);
       }
     }

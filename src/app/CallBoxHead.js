@@ -143,7 +143,7 @@ export default class CallBoxHead extends Component {
         }
       </Container>
       <Container className={style.CallBoxHead__StatusIconContainer}>
-        {((isScreenShare(call) || isVideoCallBool) && callStarted && thread && isGroup(thread)) &&
+        {(callStarted && thread && isGroup(thread)) &&
         <Fragment>
           {/*          <MdGridOn size={style.iconSizeSm} color={style.colorAccent} style={{marginLeft: "7px", cursor: "pointer"}}
                     onClick={this.switchBetweenView}/>*/}

@@ -56,9 +56,13 @@ export default class CallBoxSceneGroup extends Component {
                                                    chatCallBoxShowing={chatCallBoxShowing}
                                                    user={user}/>
     }
+    const filteredParticipantList = chatCallParticipantList.length > 4 ? chatCallParticipantList.slice(0, 4) : chatCallParticipantList;
+    if (chatCallParticipantList.length > 4) {
+      filteredParticipantList.push({contactName: "5 +"})
+    }
     return <Container className={CallBoxSceneGroupParticipantsClassNames}
                       onClick={() => this.setDetailsShowing()}>
-      {chatCallParticipantList.map(participant =>
+      {filteredParticipantList.map(participant =>
         <Container className={style.CallBoxSceneGroupParticipants__Participant}>
           {participant.mute &&
           <Container className={style.CallBoxSceneGroupParticipants__MicOffContainer} topLeft>

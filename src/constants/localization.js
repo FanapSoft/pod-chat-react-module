@@ -295,6 +295,8 @@ let strings = new LocalizedStrings({
     viewModeConfig: "حالت تماس تصویری",
     ringToneSound: "آهنگ زنگ",
     callToneSound: "آهنگ تماس",
+    notAnswered: "پاسخ نداد",
+    callAgain: "تماس دوباره",
     peopleIsTalking: (numberOfPeople) => {
       return `${numberOfPeople} نفر در تماس`
     },

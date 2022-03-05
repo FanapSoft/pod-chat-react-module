@@ -18,7 +18,10 @@ import {Text} from "../../../pod-chat-ui-kit/src/typography";
 import {ACTUAL_IMAGE_SIZE, LARGE_IMAGE_SIZE, MEDIUM_IMAGE_SIZE, SMALL_IMAGE_SIZE} from "../constants/podspace";
 import style from "../../styles/utils/ghost.scss";
 import {MdCallMissed, MdCallEnd, MdPhoneInTalk, MdTimeToLeave, MdPhoneDisabled} from "react-icons/md";
+import {CHAT_CALL_STATUS_STARTED, DROPPING_OUTGOING_TIME_OUT} from "../constants/callModes";
+import {chatCallGetParticipantList} from "../actions/chatActions";
 
+let checkForParticipantIntervalId;
 
 export function humanFileSize(bytes, si) {
   const thresh = si ? 1000 : 1024;
@@ -814,6 +817,28 @@ export function isVideoCall(call) {
   }
 }
 
+export function checkForParticipantsStatus(participants) {
+  if (checkForParticipantIntervalId) {
+    clearTimeout(checkForParticipantIntervalId);
+  }
+  checkForParticipantIntervalId = setTimeout(() => {
+    const {chatCallStatus, dispatch} = this.props;
+    const {status, call} = chatCallStatus;
+    if (status === CHAT_CALL_STATUS_STARTED) {
+      dispatch(chatCallGetParticipantList(call.callId, null, true)).then(newParticipants => {
+        const refactoredParticipants = participants.map(participant => {
+          const found = newParticipants.find(newParticipant => participant.id === newParticipant.id);
+          if (found) {
+            return found;
+          }
+          return {...participant, callStatus: 4}
+        });
+        dispatch(chatCallGetParticipantList(null, refactoredParticipants));
+      });
+    }
+  }, DROPPING_OUTGOING_TIME_OUT + 500)
+}
+
 export function isParticipantVideoTurnedOn(call, callParticipant) {
   if (!callParticipant && !call) {
     return false;
@@ -882,7 +907,7 @@ export function findRemoteStreams(user, participants, callDivs) {
 }
 
 export function analyzeCallStatus(message, user, thread) {
-  const isMessageByMeBool = user instanceof Boolean ? user : isMessageByMe(message, user, thread);
+  const isMessageByMeBool = typeof user === "boolean" ? user : isMessageByMe(message, user, thread);
   const isGroupThread = isGroup(thread);
   const {
     createTime,

@@ -168,7 +168,6 @@ export const chatCallParticipantListReducer = (state = {
       };
     case CHAT_CALL_PARTICIPANT_LIST_CHANGE:
     case CHAT_CALL_PARTICIPANT_JOINED:
-      console.log(action.payload, state.participants)
       return {
         ...state, ...stateGenerator(SUCCESS, {
           participants: updateStore(state.participants, action.payload, {
@@ -200,6 +199,9 @@ export const chatCallStatusReducer = (state = {status: null, call: null}, action
       return action.payload;
     case CHAT_CALL_PARTICIPANT_LEFT:
     case CHAT_CALL_PARTICIPANT_LIST_CHANGE:
+      if (!call) {
+        return state;
+      }
       return {
         ...state, ...stateGenerator(SUCCESS, {
           call: {
