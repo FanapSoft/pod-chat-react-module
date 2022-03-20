@@ -256,7 +256,7 @@ export default class MainFooterInput extends Component {
     }
 
     if (!isEmptyMessage) {
-      if (clearMessageText.length > 4096) {
+      if (clearMessageText.length > 8192) {
         return
       }
       this.frequentlyEmojiUsed(clearMessageText);

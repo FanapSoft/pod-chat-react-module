@@ -167,6 +167,7 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
           <List style={{overflowY: "auto"}}>
             {chatCallParticipantList.map(participant =>
               <ContactListItem invert
+                               key={participant.id}
                                contact={participant}
                                AvatarTextFragment={isCallOwner ? ({contact}) => {
                                    return <Text size="xs"

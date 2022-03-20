@@ -1,9 +1,11 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
 
+//strings
+import {BREAK_PARTICIPANT_AVATAR_LIMIT} from "../constants/callModes";
+
 //actions
-import {threadCreateWithExistThread, threadGoToMessageId} from "../actions/threadActions";
-import {chatAudioPlayer, chatCallGroupSettingsShowing} from "../actions/chatActions";
+import {chatCallGroupSettingsShowing} from "../actions/chatActions";
 
 //components
 import Container from "../../../pod-chat-ui-kit/src/container";
@@ -18,7 +20,6 @@ import {avatarNameGenerator, avatarUrlGenerator} from "../utils/helpers";
 import {getImage, getName} from "./_component/contactList";
 import classnames from "classnames";
 import CallBoxSceneGroupParticipantsControl from "./CallBoxSceneGroupParticipantsControl";
-
 
 @connect(store => {
   return {
@@ -56,8 +57,8 @@ export default class CallBoxSceneGroup extends Component {
                                                    chatCallBoxShowing={chatCallBoxShowing}
                                                    user={user}/>
     }
-    const filteredParticipantList = chatCallParticipantList.length > 4 ? chatCallParticipantList.slice(0, 4) : chatCallParticipantList;
-    if (chatCallParticipantList.length > 4) {
+    const filteredParticipantList = chatCallParticipantList.length > BREAK_PARTICIPANT_AVATAR_LIMIT ? chatCallParticipantList.slice(0, 4) : chatCallParticipantList;
+    if (chatCallParticipantList.length > BREAK_PARTICIPANT_AVATAR_LIMIT) {
       filteredParticipantList.push({contactName: "5 +"})
     }
     return <Container className={CallBoxSceneGroupParticipantsClassNames}

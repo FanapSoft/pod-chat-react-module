@@ -79,7 +79,8 @@ const statics = {
     chatRouterLess: store.chatRouterLess,
     chatSearchResult: store.chatSearchResult,
     user: store.user.user,
-    chatCallBoxShowing: store.chatCallBoxShowing
+    chatCallBoxShowing: store.chatCallBoxShowing,
+    smallVersion: store.chatSmallVersion
   };
 })
 class AsideThreads extends Component {
@@ -158,13 +159,15 @@ class AsideThreads extends Component {
       chatSearchResult,
       user,
       threadsPartialFetching,
-      chatCallBoxShowing
+      chatCallBoxShowing,
+      smallVersion
     } = this.props;
     const {activeThread, isMenuShow} = this.state;
     const callBoxCompactedCondition = chatCallBoxShowing.showing === CHAT_CALL_BOX_COMPACTED;
     const isMobile = mobileCheck();
     const classNames = classnames({
       [style.AsideThreads]: true,
+      [style["AsideThreads--smallVersion"]]: smallVersion,
       [style["AsideThreads--callBoxCompacted"]]: callBoxCompactedCondition,
       [style["AsideThreads--autoZIndex"]]: isIosAndSafari(),
       [style["AsideThreads--hiddenOverflow"]]: isMobile ? false : isMenuShow && true,

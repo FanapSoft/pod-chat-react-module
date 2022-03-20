@@ -817,6 +817,41 @@ export function isVideoCall(call) {
   }
 }
 
+//TODO: use this in video call modes: ThumbnailView and GridView for filter contacts
+export function filterVideoCallParticipants(uiElements, isVideoCall, isVideoIncluded, participants, anyOtherLogic) {
+  if (!uiElements || !participants || (participants && (!participants.length))) {
+    return participants;
+  }
+  return participants.map(participant => {
+    const logicResult = anyOtherLogic ? anyOtherLogic(participant) : true;
+    if (participant.callStatus !== 6) {
+      return;
+    }
+    if (!logicResult) {
+      return;
+    }
+    if (isVideoCall) {
+      if (uiElements[participant.id]?.video) {
+        return participant;
+      } else {
+        if (uiElements[participant.id]) {
+          return {...participant, videoMute: true}
+        } else {
+          return;
+        }
+      }
+    }
+    if (isVideoIncluded) {
+      if (uiElements[participant.id]?.video) {
+        return participant;
+      } else {
+        return null;
+      }
+    }
+  }).filter(e => e);
+
+}
+
 export function checkForParticipantsStatus(participants) {
   if (checkForParticipantIntervalId) {
     clearTimeout(checkForParticipantIntervalId);
@@ -826,13 +861,14 @@ export function checkForParticipantsStatus(participants) {
     const {status, call} = chatCallStatus;
     if (status === CHAT_CALL_STATUS_STARTED) {
       dispatch(chatCallGetParticipantList(call.callId, null, true)).then(newParticipants => {
-        const refactoredParticipants = participants.map(participant => {
+        let refactoredParticipants = participants.map(participant => {
           const found = newParticipants.find(newParticipant => participant.id === newParticipant.id);
           if (found) {
             return found;
           }
           return {...participant, callStatus: 4}
         });
+        refactoredParticipants = [...refactoredParticipants, ...newParticipants.filter(e => !refactoredParticipants.find(f => f.id === e.id))];
         dispatch(chatCallGetParticipantList(null, refactoredParticipants));
       });
     }
@@ -909,6 +945,9 @@ export function findRemoteStreams(user, participants, callDivs) {
 export function analyzeCallStatus(message, user, thread) {
   const isMessageByMeBool = typeof user === "boolean" ? user : isMessageByMe(message, user, thread);
   const isGroupThread = isGroup(thread);
+  if (!message.callHistory) {
+    return;
+  }
   const {
     createTime,
     startTime,
@@ -964,6 +1003,16 @@ export function analyzeCallStatus(message, user, thread) {
       }
     }
     case 6: {
+      if (!startTime) {
+        return {
+          Icon() {
+            return <MdCallMissed color={style.colorRed} size={style.iconSizeSm} style={{marginLeft: "5px"}}/>;
+          },
+          Text() {
+            return strings.missedCallAt(messageDatePetrification(createTime, true));
+          }
+        };
+      }
       return {
         Icon() {
           return <MdPhoneInTalk color={style.colorGreenTick} size={style.iconSizeSm} style={{marginLeft: "5px"}}/>;

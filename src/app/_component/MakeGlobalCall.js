@@ -23,11 +23,13 @@ import {MdPhone} from "react-icons/md";
 //styling
 import style from "../../../styles/utils/ghost.scss";
 import {threadCreateWithExistThread} from "../../actions/threadActions";
+import {checkForParticipantsStatus} from "../../utils/helpers";
 
 
 @connect(store => {
   return {
-    user: store.user.user
+    user: store.user.user,
+    chatCallStatus: store.chatCallStatus
   };
 }, null, null, {forwardRef: true})
 export default class MakeGlobalCall extends Component {
@@ -49,16 +51,17 @@ export default class MakeGlobalCall extends Component {
             return;
           }
           dispatch(chatSelectParticipantForCallShowing(false));
-          const selectedParticipants = allContacts.filter(e => selectedContacts.indexOf(e.id) > -1);
+          let selectedParticipants = allContacts.filter(e => selectedContacts.indexOf(e.id) > -1);
           const invitees = selectedParticipants.map(e => ({id: e.id, idType: mode === "CONTACT" ? "TO_BE_USER_CONTACT_ID" : "TO_BE_USER_ID"}));
           dispatch(chatStartGroupCall(null, invitees, callType || "VOICE", null, result => {
             selectedParticipants.push(user);
             if (mode === "CONTACT") {
-              selectedParticipants.forEach(e => e.isContactCall = true);
+              selectedParticipants = selectedParticipants.map(participant => (participant.id === user.id ? participant : {...participant, ...participant.linkedUser, id: participant.userId, contactId: participant.id}));
             }
-            dispatch(chatCallGetParticipantList(null, selectedParticipants));
-            dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, result));
             dispatch(threadCreateWithExistThread(result));
+            dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, result));
+            dispatch(chatCallGetParticipantList(null, selectedParticipants));
+            checkForParticipantsStatus.call(this, selectedParticipants);
           }));
         }}>{strings.call}</Button>
         }

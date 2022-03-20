@@ -59,7 +59,7 @@ import {
   CHAT_CALL_STATUS_OUTGOING,
   CHAT_CALL_STATUS_STARTED
 } from "../constants/callModes";
-import {callParticipantStandardization} from "../utils/helpers";
+import {callParticipantStandardization, isScreenShare, isScreenShareOwnerIsMe} from "../utils/helpers";
 
 
 let firstReadyPassed = false;
@@ -232,9 +232,9 @@ export const chatSetInstance = config => {
               videoMute: type === "TURN_OFF_VIDEO_CALL"
             })));
           case "RECEIVE_CALL":
-            if(oldCall && (oldCall?.call?.id || oldCall?.call?.callId || oldCall.status === CHAT_CALL_STATUS_OUTGOING)) {
+            if (oldCall && (oldCall?.call?.id || oldCall?.call?.callId || oldCall.status === CHAT_CALL_STATUS_OUTGOING)) {
               const chatSDK = state.chatInstance.chatSDK;
-              return setTimeout( () => chatSDK.rejectCall(call.callId), BUSY_DROP_TIME_OUT);
+              return setTimeout(() => chatSDK.rejectCall(call.callId), BUSY_DROP_TIME_OUT);
             }
             dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, call.conversationVO || {}, call.creatorVO));
             return dispatch(chatCallStatus(CHAT_CALL_STATUS_INCOMING, call));
@@ -246,14 +246,8 @@ export const chatSetInstance = config => {
                 const oldThreadParticipant = getState().chatCallParticipantList.participants;
                 const newMap = oldThreadParticipant.map(participant => {
                   const found = participants.find(finded => {
-                    if (participant.isContactCall) {
-                      if (participant.userId === finded.id) {
-                        return finded;
-                      }
-                    } else {
-                      if (participant.id === finded.id) {
-                        return finded;
-                      }
+                    if (participant.id === finded.id) {
+                      return finded;
                     }
                   });
                   if (found) {
@@ -265,6 +259,13 @@ export const chatSetInstance = config => {
               });
             } else {
               dispatch(chatCallGetParticipantList(callId));
+            }
+            if (+call?.chatDataDto?.screenShareUser) {
+              call.screenShare = {
+                screenOwner: {id: +call?.chatDataDto?.screenShareUser},
+                screenshare: call?.chatDataDto.screenShare,
+                topicSend: call?.chatDataDto.screenShare
+              }
             }
             return dispatch(chatCallStatus(CHAT_CALL_STATUS_STARTED, {callId, ...oldCall.call, ...call}))
           }
@@ -649,14 +650,20 @@ export const chatAcceptCall = (call, video = false, isJoin, thread) => {
     const chatSDK = state.chatInstance.chatSDK;
     const options = {joinCall: isJoin, video, cameraPaused: call.type !== 1};
     dispatch(chatCallStatus(CHAT_CALL_STATUS_STARTED, call));
-    if (isJoin) {
+    const updateThread = thread => {
       const {call, ...other} = thread;
       dispatch({
         type: THREAD_UPDATE,
         payload: other
       });
+    }
+    if (isJoin) {
+      updateThread(thread);
       dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, thread));
       setTimeout(() => dispatch(chatCallGetParticipantList(thread.call.id)), 1000);
+    } else {
+      const thread = state.threads.threads.find(thread => call.conversationVO.id === thread.id);
+      thread && updateThread(thread);
     }
     return chatSDK.acceptCall(call.callId || call.id, options);
   }
@@ -667,13 +674,18 @@ export const chatRejectCall = (call, status) => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
     const callBackBuilder = () => {
+      const isScreenShareCall = isScreenShare(call);
+      const isScreenSharingOwnerIsMeResult = isScreenShareCall && isScreenShareOwnerIsMe(call.screenShare, state.user.user);
+      if (isScreenShareCall && isScreenSharingOwnerIsMeResult) {
+        dispatch(chatCallEndScreenShare());
+      }
       if (call.group || call?.conversationVO?.group) {
         const found = state.threads.threads.find(thread => thread.id === call.conversationVO.id);
         if (found) {
-          call.id = call.callId;
+          const correctCall = {...call, id: call.callId, screenShare: undefined};
           dispatch({
             type: THREAD_UPDATE,
-            payload: {call, ...found}
+            payload: {call: correctCall, ...found}
           });
         }
       }
@@ -716,8 +728,17 @@ export const chatStartGroupCall = (threadId, invitees, type, params, callBack) =
   return (dispatch, getState) => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
-    chatSDK.startGroupCall(threadId, invitees, type, params, callBack);
-    dispatch(chatCallStatus(CHAT_CALL_STATUS_OUTGOING, {type: type === "video" ? 1 : 0}));
+    chatSDK.startGroupCall(threadId, invitees, type, params, result => {
+      if (!threadId) {
+        dispatch(chatCallStatus(CHAT_CALL_STATUS_OUTGOING, {type: type === "video" ? 1 : 0}));
+      }
+      callBack(result);
+    });
+
+    //If thread created before show callBox and play ringtone
+    if (threadId) {
+      dispatch(chatCallStatus(CHAT_CALL_STATUS_OUTGOING, {type: type === "video" ? 1 : 0}));
+    }
   }
 };
 

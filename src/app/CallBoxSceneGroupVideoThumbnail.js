@@ -1,7 +1,14 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
 import classnames from "classnames";
-import {avatarNameGenerator, avatarUrlGenerator, getMessageMetaData, isVideoCall, mobileCheck} from "../utils/helpers";
+import {
+  avatarNameGenerator,
+  avatarUrlGenerator,
+  filterVideoCallParticipants,
+  getMessageMetaData,
+  isVideoCall,
+  mobileCheck
+} from "../utils/helpers";
 import {
   CALL_DIV_ID, CALL_SETTING_COOKIE_KEY_NAME,
   CALL_SETTINGS_CHANGE_EVENT,
@@ -31,6 +38,15 @@ import AvatarText from "../../../pod-chat-ui-kit/src/avatar/AvatarText";
 import style from "../../styles/app/CallBoxSceneGroupVideoThumbnail.scss";
 import strings from "../constants/localization";
 
+function makeParticipantVideMute(participant, uiElements, isVideoCallResult) {
+  if (!uiElements || !participant) {
+    return participant;
+  }
+  return {
+    ...participant,
+    videoMute: participant.videoMute || (isVideoCallResult && !uiElements[participant.id]?.video)
+  };
+}
 
 @connect(store => {
   return {
@@ -57,10 +73,24 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
       participant,
       chatCallParticipantList,
       injectVideo,
-      isVideoIncluded
+      isVideoIncluded,
+      chatCallStatus
     } = this.props;
 
+    const {call} = chatCallStatus;
+    const {uiElements} = call;
     sceneParticipant = sceneParticipant || participant;
+
+    if (uiElements) {
+      if (!sceneParticipant) {
+        const newSceneParticipant = chatCallParticipantList.find(participant => uiElements[participant.id]);
+        if (newSceneParticipant) {
+          this.setState({
+            sceneParticipant: newSceneParticipant
+          });
+        }
+      }
+    }
 
     if (isScreenShare) {
       const tag = document.getElementById('video-screenShare');
@@ -76,9 +106,11 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
         return;
       }
       const tag = document.getElementById(`video-${nowSceneParticipant.id}`);
-      if (isVideoIncluded) {
-        tag.innerHTML = "";
-        traverseOverContactForInjecting();
+      if (tag) {
+        if (isVideoIncluded) {
+          tag.innerHTML = "";
+          traverseOverContactForInjecting();
+        }
       }
 
     }
@@ -120,33 +152,36 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
       participant,
       chatCallBoxShowing,
       isScreenShare,
-      isVideoIncluded,
-
+      isVideoIncluded
     } = this.props;
     let {sceneParticipant} = this.state;
     const fullScreenCondition = chatCallBoxShowing.showing === CHAT_CALL_BOX_FULL_SCREEN;
-    sceneParticipant = sceneParticipant || participant;
-    sceneParticipant = sceneParticipant && sceneParticipant.id ? sceneParticipant : chatCallParticipantList.find(partcipant => partcipant.id === sceneParticipant);
-    if (!sceneParticipant) {
-      sceneParticipant = chatCallParticipantList && chatCallParticipantList[0];
-    }
     const {call} = chatCallStatus;
     const isVideoCallResult = isVideoCall(call)
     const {uiElements} = call;
-    let filterParticipants = [];
+    sceneParticipant = sceneParticipant || participant;
+    sceneParticipant = sceneParticipant && sceneParticipant.id ? sceneParticipant : chatCallParticipantList.find(participant => participant.id === sceneParticipant);
     if (uiElements) {
-      filterParticipants = chatCallParticipantList.filter(participant => {
-        const commonCondition = (isScreenShare || participant.id !== sceneParticipant.id);
-        if (isVideoCallResult) {
-          return (participant.videoMute || uiElements[participant.id]) && commonCondition
+      const selectOnePersonForBeingSceneParticipant = !sceneParticipant || (sceneParticipant && (isVideoCallResult ? !uiElements[sceneParticipant.id] : !uiElements[sceneParticipant.id]?.video));
+      if (selectOnePersonForBeingSceneParticipant) {
+        sceneParticipant = chatCallParticipantList.find(participant => isVideoCallResult ? uiElements[participant.id] : uiElements[participant.id]?.video );
+      }
+    }
+    let filterParticipants = filterVideoCallParticipants(uiElements, isVideoCallResult, isVideoIncluded, chatCallParticipantList, participant => {
+      return (isScreenShare || participant.id !== sceneParticipant?.id);
+    });
+
+    console.log(filterParticipants)
+
+    if (filterParticipants.length === 1) {
+      if (!isVideoCallResult && isVideoIncluded) {
+        if (!sceneParticipant || !uiElements[sceneParticipant.id]?.video) {
+          sceneParticipant = filterParticipants[0];
+          filterParticipants = [];
         }
-        return uiElements[participant.id]?.video && commonCondition
-      });
+      }
     }
-    if (!sceneParticipant) {
-      sceneParticipant = {};
-    }
-    sceneParticipant = chatCallParticipantList.find(participant => participant.id === sceneParticipant.id);
+    sceneParticipant = makeParticipantVideMute(sceneParticipant, uiElements, isVideoCallResult);
     const classNames = classnames({
       [style.CallBoxSceneGroupVideoThumbnail]: true,
     });

@@ -978,7 +978,6 @@ export default class ChatSDK {
       ...params
     };
     chatAgent.startGroupCall(callParams, e => {
-      console.log(e)
       callBack && callBack(e.result);
     });
   }

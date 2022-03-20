@@ -73,3 +73,11 @@
     }
   }
 }
+
+@include grid("md") {
+  .AsideThreads:not(.AsideThreads--smallVersion) {
+    &.AsideThreads--callBoxCompacted {
+      padding-top: 0;
+    }
+  }
+}

@@ -31,7 +31,7 @@ export default class CallBoxCompactedGroup extends Component {
     const {chatCallBoxShowing, chatCallStatus, chatCallParticipantList} = this.props;
     return <Container className={style.CallBoxCompactedGroup}>
       {chatCallParticipantList.map(participant =>
-        <Container className={style.CallBoxCompactedGroup__Participant}>
+        <Container key={participant.id} className={style.CallBoxCompactedGroup__Participant}>
           {participant.mute &&
           <Container className={style.CallBoxCompactedGroup__MicOffContainer}>
             <MdMicOff size={style.iconSizeXs}
