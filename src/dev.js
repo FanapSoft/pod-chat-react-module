@@ -1,6 +1,6 @@
 import React from "react";
 import {BrowserRouter} from "react-router-dom";
-import ReactDOM, {render} from "react-dom";
+import ReactDOM from "react-dom/client";
 import {Provider} from "react-redux";
 import {serverConfig} from "./constants/connection";
 import store from "./store/index";
@@ -11,19 +11,16 @@ import {auth, retry} from "podauth/src/auth";
 import SupportModule from "./app/SupportModule";
 
 function renderPodchat(token) {
-  // supportMode={8453}
-  render(
-    <Provider store={store}>
-      <BrowserRouter>
-        <SupportModule>
-          <Index token={token}  {...serverConfig(true)} onRetryHook={e => {
-            return retry();
-          }}/>
-        </SupportModule>
-      </BrowserRouter>
-    </Provider>,
-    document.getElementById("app")
-  );
+  const root = ReactDOM.createRoot(document.getElementById("app"));
+  root.render(<Provider store={store}>
+    <BrowserRouter>
+      <SupportModule>
+        <Index token={token}  {...serverConfig(true)} onRetryHook={e => {
+          return retry();
+        }}/>
+      </SupportModule>
+    </BrowserRouter>
+  </Provider>);
 }
 
 auth({

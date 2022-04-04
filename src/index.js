@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM, {render} from "react-dom";
+import ReactDOM from "react-dom/client";
 import {Provider} from "react-redux";
 import store from "./store/index";
 import "../styles/main.scss";
@@ -23,16 +23,15 @@ function PodchatJSX(props) {
 function Podchat(props, elementId) {
   let instance;
 
-  render(
+  const root = ReactDOM.createRoot(document.getElementById(elementId));
+  root.render(
     <Provider store={store}>
       <BrowserRouter>
         <SupportModule supportMode={props && props.supportMode}>
           <Index {...props} wrappedComponentRef={e => instance = e}/>
         </SupportModule>
       </BrowserRouter>
-    </Provider>,
-    document.getElementById(elementId)
-  );
+    </Provider>)
   return instance;
 }
 

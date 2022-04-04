@@ -41,7 +41,8 @@ import {checkForParticipantsStatus} from "../utils/helpers";
 
 @connect(store => {
   return {
-    chatCallStatus: store.chatCallStatus
+    chatCallStatus: store.chatCallStatus,
+    threads: store.threads.threads
   }
 })
 export default class CallBoxSceneGroupParticipantsControl extends Component {
@@ -128,13 +129,14 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
   }
 
   render() {
-    const {chatCallParticipantList, chatCallBoxShowing, user, chatCallStatus} = this.props;
+    const {chatCallParticipantList, chatCallBoxShowing, user, chatCallStatus, threads} = this.props;
     const {call, status} = chatCallStatus;
     const classNames = classnames({
       [style.CallBoxSceneGroupParticipantsControl]: true
     });
-    const {thread, contact} = chatCallBoxShowing;
-    const isCallOwner = call && call.isOwner || isOwner(thread, user);
+    let {thread} = chatCallBoxShowing;
+    const isCallOwner = (call && call.isOwner) || isOwner(thread, user);
+    thread = isCallOwner ? thread : threads.find(e => e.id === thread.id);
     const muteUnmutePermissionCondition = (isOwner(thread, user) || isCallOwner);
     return <Modal isOpen={true} wrapContent userSelect="none">
 
@@ -148,7 +150,7 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
               </Text>
             </Container>
 
-            {(isCallOwner && thread.participantCount < MAX_GROUP_CALL_COUNT) &&
+            {(thread.participantCount < MAX_GROUP_CALL_COUNT) &&
             <Container cursor="pointer">
 
               <MdAdd onClick={this.onAddMember}
@@ -169,14 +171,13 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
               <ContactListItem invert
                                key={participant.id}
                                contact={participant}
-                               AvatarTextFragment={isCallOwner ? ({contact}) => {
+                               AvatarTextFragment={({contact}) => {
                                    return <Text size="xs"
                                                 color={contact.callStatus === 6 ? "green" : contact.callStatus === 4 ? "red" : "accent"}
                                                 bold>
                                      {contact.callStatus === 6 ? strings.callStarted : contact.callStatus === 4 ? strings.notAnswered : strings.callingWithNoType}
                                    </Text>
-                                 }
-                                 : null}
+                                 }}
                                AvatarNameFragment={
                                  ({contact}) => {
                                    return contact.admin ?

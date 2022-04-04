@@ -278,9 +278,9 @@ let strings = new LocalizedStrings({
     callingWithNoType: "در حال برقراری ارتباط",
     calling: isVideoCall => {
       if (isVideoCall) {
-        return "درحال برقراری ارتباط تصویری";
+        return "درحال تماس تصویری";
       }
-      return "درحال برقراری ارتباط صوتی";
+      return "درحال تماس صوتی";
     },
     ringing: isVideoCall => {
       if (isVideoCall) {

@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import {connect} from "react-redux";
 
 //strings
-import {BREAK_PARTICIPANT_AVATAR_LIMIT} from "../constants/callModes";
+import {BREAK_PARTICIPANT_AVATAR_LIMIT, CHAT_CALL_STATUS_STARTED} from "../constants/callModes";
 
 //actions
 import {chatCallGroupSettingsShowing} from "../actions/chatActions";
@@ -43,8 +43,9 @@ export default class CallBoxSceneGroup extends Component {
   }
 
   render() {
-    const {chatCallParticipantList, chatCallBoxShowing, user, chatCallGroupSettingsShowing} = this.props;
+    const {chatCallParticipantList, chatCallBoxShowing, user, chatCallGroupSettingsShowing, chatCallStatus} = this.props;
     const {detailsListShowing} = this.state;
+    const callStarted = chatCallStatus.status === CHAT_CALL_STATUS_STARTED;
     const CallBoxSceneGroupParticipantsClassNames = classnames({
       [style.CallBoxSceneGroupParticipants]: true,
       [style["CallBoxSceneGroupParticipants--details"]]: detailsListShowing
@@ -57,14 +58,15 @@ export default class CallBoxSceneGroup extends Component {
                                                    chatCallBoxShowing={chatCallBoxShowing}
                                                    user={user}/>
     }
-    const filteredParticipantList = chatCallParticipantList.length > BREAK_PARTICIPANT_AVATAR_LIMIT ? chatCallParticipantList.slice(0, 4) : chatCallParticipantList;
+    let filteredParticipantList = chatCallParticipantList.length > BREAK_PARTICIPANT_AVATAR_LIMIT ? chatCallParticipantList.slice(0, 4) : chatCallParticipantList;
     if (chatCallParticipantList.length > BREAK_PARTICIPANT_AVATAR_LIMIT) {
       filteredParticipantList.push({contactName: "5 +"})
     }
+    filteredParticipantList = callStarted ? filteredParticipantList.filter(e => e.callStatus === 6) : filteredParticipantList;
     return <Container className={CallBoxSceneGroupParticipantsClassNames}
                       onClick={() => this.setDetailsShowing()}>
       {filteredParticipantList.map(participant =>
-        <Container className={style.CallBoxSceneGroupParticipants__Participant}>
+        <Container className={style.CallBoxSceneGroupParticipants__Participant} title={getName(participant)}>
           {participant.mute &&
           <Container className={style.CallBoxSceneGroupParticipants__MicOffContainer} topLeft>
             <MdMicOff size={style.iconSizeXs}

@@ -13,7 +13,7 @@ import {
   messageSelectedCondition,
   showMessageNameOrAvatar,
   isChannel,
-  findLastSeenMessage
+  findLastSeenMessage, isSystemMessage, isFile, isMessageIsFile
 } from "../utils/helpers";
 import isElementVisible from "../utils/dom";
 
@@ -178,7 +178,8 @@ export default class MainMessages extends Component {
     }
     if (oldNewMessage && messageNew) {
       if (oldNewMessage.uniqueId === messageNew.uniqueId) {
-        if (!oldNewMessage.id && messageNew.id) {
+        //TODO: check for session recording is not the correct way remove it later
+        if (!oldNewMessage.id && messageNew.id || (isSystemMessage(oldNewMessage) && isMessageIsFile(messageNew))) {
           dispatch(threadNewMessage(messageNew));
         }
         return true;

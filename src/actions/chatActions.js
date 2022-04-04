@@ -650,20 +650,22 @@ export const chatAcceptCall = (call, video = false, isJoin, thread) => {
     const chatSDK = state.chatInstance.chatSDK;
     const options = {joinCall: isJoin, video, cameraPaused: call.type !== 1};
     dispatch(chatCallStatus(CHAT_CALL_STATUS_STARTED, call));
-    const updateThread = thread => {
-      const {call, ...other} = thread;
-      dispatch({
-        type: THREAD_UPDATE,
-        payload: other
-      });
-    }
-    if (isJoin) {
-      updateThread(thread);
-      dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, thread));
-      setTimeout(() => dispatch(chatCallGetParticipantList(thread.call.id)), 1000);
-    } else {
-      const thread = state.threads.threads.find(thread => call.conversationVO.id === thread.id);
-      thread && updateThread(thread);
+    if (call?.group) {
+      const updateThread = thread => {
+        const {call, ...other} = thread;
+        dispatch({
+          type: THREAD_UPDATE,
+          payload: other
+        });
+      }
+      if (isJoin) {
+        updateThread(thread);
+        dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, thread));
+        setTimeout(() => dispatch(chatCallGetParticipantList(thread.call.id)), 1000);
+      } else {
+        const thread = state.threads.threads.find(thread => call.conversationVO.id === thread.id);
+        thread && updateThread(thread);
+      }
     }
     return chatSDK.acceptCall(call.callId || call.id, options);
   }
