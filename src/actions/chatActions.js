@@ -650,7 +650,7 @@ export const chatAcceptCall = (call, video = false, isJoin, thread) => {
     const chatSDK = state.chatInstance.chatSDK;
     const options = {joinCall: isJoin, video, cameraPaused: call.type !== 1};
     dispatch(chatCallStatus(CHAT_CALL_STATUS_STARTED, call));
-    if (call?.group) {
+    if (call?.group || call?.conversationVO?.group) {
       const updateThread = thread => {
         const {call, ...other} = thread;
         dispatch({

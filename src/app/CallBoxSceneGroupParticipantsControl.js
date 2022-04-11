@@ -172,12 +172,12 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
                                key={participant.id}
                                contact={participant}
                                AvatarTextFragment={({contact}) => {
-                                   return <Text size="xs"
-                                                color={contact.callStatus === 6 ? "green" : contact.callStatus === 4 ? "red" : "accent"}
-                                                bold>
-                                     {contact.callStatus === 6 ? strings.callStarted : contact.callStatus === 4 ? strings.notAnswered : strings.callingWithNoType}
-                                   </Text>
-                                 }}
+                                 return <Text size="xs"
+                                              color={contact.callStatus === 6 ? "green" : contact.callStatus === 4 ? "red" : "accent"}
+                                              bold>
+                                   {contact.callStatus === 6 ? strings.callStarted : contact.callStatus === 4 ? strings.notAnswered : strings.callingWithNoType}
+                                 </Text>
+                               }}
                                AvatarNameFragment={
                                  ({contact}) => {
                                    return contact.admin ?
@@ -192,10 +192,10 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
                                      {status === CHAT_CALL_STATUS_STARTED &&
                                      <Container
                                        style={{
-                                         margin: "3px 0"/*,
-                                         cursor: muteUnmutePermissionCondition ? "pointer" : "default"*/
-                                       }}/*
-                                       onClick={muteUnmutePermissionCondition && this.onParticipantMuteClick.bind(this, contact)}*/>
+                                         margin: "3px 0",
+                                         cursor: "pointer"
+                                       }}
+                                       onClick={this.onParticipantMuteClick.bind(this, contact)}>
                                        {contact.callStatus === 4 &&
                                        <MdAddCall size={style.iconSizeSm}
                                                   onClick={this.callAgain.bind(null, contact)}
