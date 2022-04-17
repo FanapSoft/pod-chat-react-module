@@ -21,9 +21,6 @@ import MainFooter from "./MainFooter";
 import MainPinMessage from "./MainPinMessage";
 import MainIntro from "./MainIntro";
 import MainAudioPlayer from "./MainAudioPlayer";
-import CallBox from "./CallBox";
-import CallBoxCompacted from "./CallBoxCompacted";
-
 //styling
 import style from "../../styles/app/Main.scss";
 import coverImage from "../../styles/images/Main/cover.jpg";

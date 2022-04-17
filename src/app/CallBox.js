@@ -35,6 +35,8 @@ import CallBoxHead from "./CallBoxHead";
 import ringtoneSound from "../constants/ringtone.mp3";
 import callingTone from "../constants/callingTone.mp3";
 import CallBoxSceneGroup from "./CallBoxSceneGroup";
+import {CgPacman} from "react-icons/all";
+import Draggable from "react-draggable";
 
 
 @connect(store => {
@@ -174,6 +176,12 @@ export default class CallBox extends Component {
       [style["CallBox--group"]]: thread && isGroup(thread)
     });
 
+    const callBoxDraggableClassNames = classnames({
+      [style.CallBox__DraggableContainer]: true,
+      [style["CallBox__DraggableContainer--fullScreen"]]: callBoxShowingType === CHAT_CALL_BOX_FULL_SCREEN || mobileCheck(),
+      [style["CallBox__DraggableContainer--showing"]]: callBoxShowingType === CHAT_CALL_BOX_NORMAL || callBoxShowingType === CHAT_CALL_BOX_FULL_SCREEN,
+    });
+
     const callBoxHeadClassNames = classnames({
       [style.CallBox__Head]: true,
       [style["CallBox__Head--hide"]]: !showControl && fullScreenCondition
@@ -183,35 +191,39 @@ export default class CallBox extends Component {
       [style["CallBox__ControlSet--hide"]]: !showControl && fullScreenCondition
     });
 
-    return <Container className={classNames} onClick={fullScreenCondition && this.hideOrShowControls} id="chat-call-box">
+    return <Draggable bounds="body" disabled={mobileCheck() || fullScreenCondition}>
+      <Container className={callBoxDraggableClassNames}>
+        <Container className={classNames} onClick={fullScreenCondition && this.hideOrShowControls} id="chat-call-box">
 
-      <Container className={callBoxHeadClassNames} onClick={this.onCallBoxClick}>
-        <CallBoxHead chatCallStatus={chatCallStatus} thread={thread} chatCallBoxShowing={chatCallBoxShowing}/>
+          <Container className={callBoxHeadClassNames} onClick={this.onCallBoxClick}>
+            <CallBoxHead chatCallStatus={chatCallStatus} thread={thread} chatCallBoxShowing={chatCallBoxShowing}/>
+          </Container>
+
+          {(callBoxShowingType === CHAT_CALL_BOX_NORMAL || callBoxShowingType === CHAT_CALL_BOX_FULL_SCREEN) &&
+          <Fragment>
+            <Container className={style.CallBox__Scene}>
+              <>
+                {isGroup(thread) ?
+                  <CallBoxSceneGroup chatCallStatus={chatCallStatus} chatCallBoxShowing={chatCallBoxShowing}/>
+                  :
+                  <CallBoxScenePerson chatCallStatus={chatCallStatus} chatCallBoxShowing={chatCallBoxShowing}/>
+                }
+                {isRecording(call) &&
+                <Container className={style.CallBox__RecordingContainer}>
+                  <CallBoxRecording call={call}/>
+                </Container>
+                }
+              </>
+            </Container>
+            <Container className={CallBoxControlSetClassNames}>
+              <CallBoxControlSet stopRingtone={this.stopRingtone} className={style.CallBox__ControlSet}/>
+            </Container>
+          </Fragment>
+          }
+
+
+        </Container>
       </Container>
-
-      {(callBoxShowingType === CHAT_CALL_BOX_NORMAL || callBoxShowingType === CHAT_CALL_BOX_FULL_SCREEN) &&
-      <Fragment>
-        <Container className={style.CallBox__Scene}>
-          <>
-            {isGroup(thread) ?
-              <CallBoxSceneGroup chatCallStatus={chatCallStatus} chatCallBoxShowing={chatCallBoxShowing}/>
-              :
-              <CallBoxScenePerson chatCallStatus={chatCallStatus} chatCallBoxShowing={chatCallBoxShowing}/>
-            }
-            {isRecording(call) &&
-              <Container className={style.CallBox__RecordingContainer}>
-                <CallBoxRecording call={call}/>
-              </Container>
-            }
-          </>
-        </Container>
-        <Container className={CallBoxControlSetClassNames}>
-          <CallBoxControlSet stopRingtone={this.stopRingtone} className={style.CallBox__ControlSet}/>
-        </Container>
-      </Fragment>
-      }
-
-
-    </Container>
+    </Draggable>
   }
 }

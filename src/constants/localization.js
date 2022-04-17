@@ -340,6 +340,12 @@ let strings = new LocalizedStrings({
     participantLeftCall(participant) {
       return `${participant} از تماس خارج شد`
     },
+    callWithContacts(contactNames, isExceeded) {
+      return `تماس با ${contactNames}${isExceeded? " و ...": ""}`
+    },
+    callWithContactsDesc(title){
+      return `${title} -این گروه در تاریخ ${new Date().toLocaleDateString("fa")} ایجاد شده است`
+    }
   },
   it: {}
 });

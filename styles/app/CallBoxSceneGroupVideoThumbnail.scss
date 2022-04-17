@@ -45,7 +45,7 @@
 
 .CallBoxSceneGroupVideoThumbnail__ListScroller {
   display: flex;
-  overflow-x: auto;
+  overflow: hidden;
   width: 100%;
 }
 

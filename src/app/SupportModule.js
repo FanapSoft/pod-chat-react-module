@@ -42,7 +42,7 @@ export default class SupportModule extends Component {
     });
     return <Fragment>
       <Container style={chatSupportModuleBadgeShowing ? null : {display: "none"}}>
-        <SupportModuleBadge chatSupportModuleBadgeShowing={chatSupportModuleBadgeShowing}/>
+        <SupportModuleBadge  chatSupportModuleBadgeShowing={chatSupportModuleBadgeShowing}/>
       </Container>
 
       <Container className={classNames}

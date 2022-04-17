@@ -61,9 +61,7 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
   onParticipantMuteClick(participant, e) {
     e.stopPropagation();
     const {chatCallStatus, user, dispatch} = this.props;
-    if (participant.mute) {
-      dispatch(chatCallUnMuteParticipants(chatCallStatus.call.callId, [participant.id]));
-    } else {
+    if (!participant.mute) {
       dispatch(chatCallMuteParticipants(chatCallStatus.call.callId, [participant.id]));
     }
   }
@@ -194,8 +192,7 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
                                        style={{
                                          margin: "3px 0",
                                          cursor: "pointer"
-                                       }}
-                                       onClick={this.onParticipantMuteClick.bind(this, contact)}>
+                                       }}>
                                        {contact.callStatus === 4 &&
                                        <MdAddCall size={style.iconSizeSm}
                                                   onClick={this.callAgain.bind(null, contact)}
@@ -213,6 +210,7 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
                                                    }}/>
                                          :
                                          <MdMic size={style.iconSizeSm}
+                                                onClick={this.onParticipantMuteClick.bind(this, contact)}
                                                 color={style.colorAccentDark}
                                                 style={{
                                                   margin: "3px 4px",

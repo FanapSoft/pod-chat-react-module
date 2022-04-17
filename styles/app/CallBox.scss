@@ -19,6 +19,25 @@
   z-index: -$z-index-10;
 }
 
+.CallBox__DraggableContainer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: -$z-index-10;
+  opacity: 0;
+}
+
+.CallBox__DraggableContainer--showing {
+  z-index: $z-index-2;
+  opacity: 1;
+}
+
+.CallBox__DraggableContainer--fullScreen {
+  width: 100%;
+  height: 100%;
+  transform: translate(0, 0) !important;
+}
+
 .CallBox--showing {
   z-index: $z-index-2;
   opacity: 1;
@@ -29,7 +48,6 @@
 .CallBox--noThreadOpened {
   bottom: 13px;
 }
-
 
 
 @keyframes gradient {

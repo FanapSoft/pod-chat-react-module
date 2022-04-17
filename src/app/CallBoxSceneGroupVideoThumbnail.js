@@ -37,6 +37,7 @@ import AvatarText from "../../../pod-chat-ui-kit/src/avatar/AvatarText";
 //styling
 import style from "../../styles/app/CallBoxSceneGroupVideoThumbnail.scss";
 import strings from "../constants/localization";
+import {findDOMNode} from "react-dom";
 
 function makeParticipantVideMute(participant, uiElements, isVideoCallResult) {
   if (!uiElements || !participant) {
@@ -62,6 +63,17 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
     this.state = {
       sceneParticipant: null
     }
+    this.scroller = {
+      isDown: false,
+      startX: null,
+      scrollLeft: null,
+      participantMouseDown: null
+    };
+    this.onScrollerMouseDown = this.onScrollerMouseDown.bind(this);
+    this.onScrollerMouseLeaveUp = this.onScrollerMouseLeaveUp.bind(this);
+    this.onScrollerMouseMove = this.onScrollerMouseMove.bind(this);
+    this.onParticipantMouseDown = this.onParticipantMouseDown.bind(this);
+    this.scrollerRef = React.createRef();
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -139,10 +151,44 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
 
   onParticipantClick(participant, e) {
     e.stopPropagation();
+    const slider = findDOMNode(this.scrollerRef.current);
+    if (slider.scrollLeft !== this.scroller.participantMouseDown) {
+      return
+    }
     this.props.resetMediaSourceLocation();
     this.setState({
       sceneParticipant: participant
     });
+  }
+
+  onScrollerMouseDown(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    const slider = e.currentTarget;
+    this.scroller.isDown = true
+    this.scroller.startX = e.pageX - slider.offsetLeft;
+    this.scroller.scrollLeft = slider.scrollLeft;
+  }
+
+  onParticipantMouseDown() {
+    this.scroller.participantMouseDown = findDOMNode(this.scrollerRef.current).scrollLeft;
+  }
+
+  onScrollerMouseLeaveUp(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    this.scroller.isDown = false;
+  }
+
+  onScrollerMouseMove(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    const slider = e.currentTarget;
+    if (!this.scroller.isDown) return;
+    e.preventDefault();
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - this.scroller.startX) * 3; //scroll-fast
+    slider.scrollLeft = this.scroller.scrollLeft - walk;
   }
 
   render() {
@@ -164,14 +210,13 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
     if (uiElements) {
       const selectOnePersonForBeingSceneParticipant = !sceneParticipant || (sceneParticipant && (isVideoCallResult ? !uiElements[sceneParticipant.id] : !uiElements[sceneParticipant.id]?.video));
       if (selectOnePersonForBeingSceneParticipant) {
-        sceneParticipant = chatCallParticipantList.find(participant => isVideoCallResult ? uiElements[participant.id] : uiElements[participant.id]?.video );
+        sceneParticipant = chatCallParticipantList.find(participant => isVideoCallResult ? uiElements[participant.id] : uiElements[participant.id]?.video);
       }
     }
     let filterParticipants = filterVideoCallParticipants(uiElements, isVideoCallResult, isVideoIncluded, chatCallParticipantList, participant => {
       return (isScreenShare || participant.id !== sceneParticipant?.id);
     });
 
-    console.log(filterParticipants)
 
     if (filterParticipants.length === 1) {
       if (!isVideoCallResult && isVideoIncluded) {
@@ -196,6 +241,19 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
       [style.CallBoxSceneGroupVideoThumbnail__Scene]: true,
       [style["CallBoxSceneGroupVideoThumbnail__Scene--screenShare"]]: isScreenShare
     })
+
+    if (filterParticipants.length) {
+      filterParticipants.push(filterParticipants[0])
+      filterParticipants.push(filterParticipants[0])
+      filterParticipants.push(filterParticipants[0])
+      filterParticipants.push(filterParticipants[0])
+      filterParticipants.push(filterParticipants[0])
+      filterParticipants.push(filterParticipants[0])
+      filterParticipants.push(filterParticipants[0])
+      filterParticipants.push(filterParticipants[0])
+      filterParticipants.push(filterParticipants[0])
+      filterParticipants.push(filterParticipants[0])
+    }
 
     return <Container className={classNames}>
       <Container className={sceneClassNames}>
@@ -223,10 +281,16 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
       {isVideoIncluded &&
       <Container className={listClassNames}>
         <Container className={style.CallBoxSceneGroupVideoThumbnail__ListContainer}>
-          <Container className={style.CallBoxSceneGroupVideoThumbnail__ListScroller}>
+          <Container className={style.CallBoxSceneGroupVideoThumbnail__ListScroller}
+                     ref={this.scrollerRef}
+                     onMouseDown={this.onScrollerMouseDown}
+                     onMouseLeave={this.onScrollerMouseLeaveUp}
+                     onMouseUp={this.onScrollerMouseLeaveUp}
+                     onMouseMove={this.onScrollerMouseMove}>
             {filterParticipants.map((participant, index) =>
               <Container className={style.CallBoxSceneGroupVideoThumbnail__ListItem}
                          key={participant.id}
+                         onMouseDown={this.onParticipantMouseDown}
                          onClick={!isScreenShare && this.onParticipantClick.bind(this, participant)}>
                 <Container className={style.CallBoxSceneGroupVideoThumbnail__MuteContainer}>
                   {participant && participant.mute &&

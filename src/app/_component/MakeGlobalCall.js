@@ -24,7 +24,20 @@ import {MdPhone} from "react-icons/md";
 import style from "../../../styles/utils/ghost.scss";
 import {threadCreateWithExistThread} from "../../actions/threadActions";
 import {checkForParticipantsStatus} from "../../utils/helpers";
+import {getName} from "./contactList";
 
+function getTitleForThread(selectedParticipant) {
+  const map = selectedParticipant.map(participant=>getName(participant))
+  if(map.length > 3) {
+    return strings.callWithContacts(map.slice(0, 3).join(", "), true);
+  }
+  return strings.callWithContacts(map.join(", "));
+}
+
+function getDescriptionForThread(selectedParticipant) {
+  const title = getTitleForThread(selectedParticipant);
+  return strings.callWithContactsDesc(title);
+}
 
 @connect(store => {
   return {
@@ -52,17 +65,31 @@ export default class MakeGlobalCall extends Component {
           }
           dispatch(chatSelectParticipantForCallShowing(false));
           let selectedParticipants = allContacts.filter(e => selectedContacts.indexOf(e.id) > -1);
-          const invitees = selectedParticipants.map(e => ({id: e.id, idType: mode === "CONTACT" ? "TO_BE_USER_CONTACT_ID" : "TO_BE_USER_ID"}));
-          dispatch(chatStartGroupCall(null, invitees, callType || "VOICE", null, result => {
-            selectedParticipants.push(user);
-            if (mode === "CONTACT") {
-              selectedParticipants = selectedParticipants.map(participant => (participant.id === user.id ? participant : {...participant, ...participant.linkedUser, id: participant.userId, contactId: participant.id}));
-            }
-            dispatch(threadCreateWithExistThread(result));
-            dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, result));
-            dispatch(chatCallGetParticipantList(null, selectedParticipants));
-            checkForParticipantsStatus.call(this, selectedParticipants);
+          const invitees = selectedParticipants.map(e => ({
+            id: e.id,
+            idType: mode === "CONTACT" ? "TO_BE_USER_CONTACT_ID" : "TO_BE_USER_ID"
           }));
+
+          dispatch(chatStartGroupCall(null, invitees, callType || "VOICE",
+            {
+              threadInfo: {
+                title: getTitleForThread(selectedParticipants),
+                description: getDescriptionForThread(selectedParticipants)
+              }
+            }, result => {
+              selectedParticipants.push(user);
+              if (mode === "CONTACT") {
+                selectedParticipants = selectedParticipants.map(participant => (participant.id === user.id ? participant : {
+                  ...participant, ...participant.linkedUser,
+                  id: participant.userId,
+                  contactId: participant.id
+                }));
+              }
+              dispatch(threadCreateWithExistThread(result));
+              dispatch(chatCallBoxShowing(CHAT_CALL_BOX_NORMAL, result));
+              dispatch(chatCallGetParticipantList(null, selectedParticipants));
+              checkForParticipantsStatus.call(this, selectedParticipants);
+            }));
         }}>{strings.call}</Button>
         }
 
