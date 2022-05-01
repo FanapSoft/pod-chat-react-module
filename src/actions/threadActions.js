@@ -166,10 +166,16 @@ export const threadNew = thread=> {
   }
 };
 
-export const threadMessageGetList = (threadId, count) => {
+export const threadMessageGetList = (threadId, count, reset) => {
   return (dispatch, getState) => {
     const state = getState();
     const chatSDK = state.chatInstance.chatSDK;
+    if(reset) {
+      return dispatch({
+        type: THREAD_GET_MESSAGE_LIST(CANCELED),
+        payload: null
+      });
+    }
     dispatch({
       type: THREAD_GET_MESSAGE_LIST("PENDING"),
       payload: null

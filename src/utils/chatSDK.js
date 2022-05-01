@@ -16,11 +16,11 @@ export default class ChatSDK {
 
   constructor(props) {
     this.params = {
-      socketAddress: props.config.local ? "ws://172.16.106.26:8003/ws" : "wss://chat-sandbox.pod.ir/ws", // {**REQUIRED**} Socket Address
-      ssoHost: props.config.local ? "http://172.16.110.76" : "https://accounts.pod.ir", // {**REQUIRED**} Socket Address
       ssoGrantDevicesAddress: "/oauth2/grants/devices", // {**REQUIRED**} Socket Address
-      platformHost: props.config.local ? "http://172.16.106.26:8080/hamsam" : "https://sandbox.pod.ir/srv/basic-platform", // {**REQUIRED**} Platform Core Address
-      fileServer: "https://sandbox.pod.land:8443", // {**REQUIRED**} File Server Address
+      socketAddress: props.config.local ? "wss://chat-sandbox.pod.ir/ws" : "wss://msg.pod.ir/ws",
+      platformHost:  props.config.local ? "https://sandbox.pod.ir:8043/srv/basic-platform" : "https://api.pod.ir/srv/core",
+      fileServer:  props.config.local ? "https://sandbox.pod.land:8443" : "https://core.pod.ir",
+      podSpaceFileServer: props.config.local ? "https://sandbox.podspace.ir:8443" : "https://podspace.pod.ir",
       serverName: "chat-server", // {**REQUIRED**} Server to to register on
       token: null, // {**REQUIRED**} SSO Token Zamani
       wsConnectionWaitTime: 500, // Time out to wait for socket to get ready after open

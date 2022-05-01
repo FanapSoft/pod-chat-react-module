@@ -163,7 +163,9 @@ export default class MainMessages extends Component {
       user
     } = this.props;
     const {messageNew, thread, threadGoToMessageId} = nextProps;
-    const {hasNext} = threadMessages;
+    const {hasNext, fetching} = threadMessages;
+
+    console.log(fetching, thread?.id)
 
     if (threadGoToMessageId !== oldThreadGoToMessageId) {
       if (threadGoToMessageId) {
@@ -354,6 +356,7 @@ export default class MainMessages extends Component {
     this.hasPendingMessageToGo = null;
     const {thread, dispatch} = this.props;
     const {unreadBar, newMessageUnreadCount} = this.state;
+    console
     dispatch(threadMessageGetListPartial(null, null, null, null, true));
     dispatch(threadMessageGetListByMessageId(null, null, null, true));
     if (fetchLastHistoryWithoutAnyCondition) {
@@ -620,6 +623,7 @@ export default class MainMessages extends Component {
     } = this.props;
     const {highLightMessage, bottomButtonShowing, unreadBar, newMessageUnreadCount} = this.state;
     let {messages, fetching, hasPrevious, hasNext} = threadMessages;
+    console.log(fetching, thread?.id)
     /*    messages = messages.filter(message => {
           const callHistory = message.callHistory;
           if (!callHistory) {

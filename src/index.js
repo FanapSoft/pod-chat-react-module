@@ -20,19 +20,17 @@ function PodchatJSX(props) {
   );
 }
 
-function Podchat(props, elementId) {
-  let instance;
+function Podchat(props, elementId, callBack) {
 
   const root = ReactDOM.createRoot(document.getElementById(elementId));
   root.render(
     <Provider store={store}>
       <BrowserRouter>
         <SupportModule supportMode={props && props.supportMode}>
-          <Index {...props} wrappedComponentRef={e => instance = e}/>
+          <Index {...props} wrappedComponentRef={callBack}/>
         </SupportModule>
       </BrowserRouter>
     </Provider>)
-  return instance;
 }
 
 function DestroyPodchat(elementId) {

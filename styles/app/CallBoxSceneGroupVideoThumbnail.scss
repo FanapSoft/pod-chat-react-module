@@ -49,6 +49,10 @@
   width: 100%;
 }
 
+.CallBoxSceneGroupVideoThumbnail__ListScroller--mobile {
+  overflow-x: auto;
+}
+
 .CallBoxSceneGroupVideoThumbnail__ListItem {
   display: flex;
   overflow: hidden;

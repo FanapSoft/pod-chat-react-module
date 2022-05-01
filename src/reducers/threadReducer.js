@@ -664,6 +664,13 @@ export const threadMessageListReducer = (state = {
         })
       };
     }
+    case THREAD_GET_MESSAGE_LIST(CANCELED):
+      return {
+        ...state, ...stateGenerator(CANCELED, {
+          threadId: null,
+          messages: []
+        })
+      }
     case THREAD_CREATE_ON_THE_FLY:
       return {
         ...state, ...stateGenerator(SUCCESS, {
@@ -678,6 +685,7 @@ export const threadMessageListReducer = (state = {
     case THREAD_GET_MESSAGE_LIST_BY_MESSAGE_ID(SUCCESS):
     case THREAD_GET_MESSAGE_LIST(SUCCESS): {
       const {threadId, messages} = action.payload;
+      console.log(state, threadId)
       if (state.threadId) {
         if (threadId !== state.threadId) {
           return state;

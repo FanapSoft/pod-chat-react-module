@@ -203,7 +203,8 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
     let {sceneParticipant} = this.state;
     const fullScreenCondition = chatCallBoxShowing.showing === CHAT_CALL_BOX_FULL_SCREEN;
     const {call} = chatCallStatus;
-    const isVideoCallResult = isVideoCall(call)
+    const isVideoCallResult = isVideoCall(call);
+    const isMobile = mobileCheck();
     const {uiElements} = call;
     sceneParticipant = sceneParticipant || participant;
     sceneParticipant = sceneParticipant && sceneParticipant.id ? sceneParticipant : chatCallParticipantList.find(participant => participant.id === sceneParticipant);
@@ -240,20 +241,12 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
     const sceneClassNames = classnames({
       [style.CallBoxSceneGroupVideoThumbnail__Scene]: true,
       [style["CallBoxSceneGroupVideoThumbnail__Scene--screenShare"]]: isScreenShare
-    })
+    });
 
-    if (filterParticipants.length) {
-      filterParticipants.push(filterParticipants[0])
-      filterParticipants.push(filterParticipants[0])
-      filterParticipants.push(filterParticipants[0])
-      filterParticipants.push(filterParticipants[0])
-      filterParticipants.push(filterParticipants[0])
-      filterParticipants.push(filterParticipants[0])
-      filterParticipants.push(filterParticipants[0])
-      filterParticipants.push(filterParticipants[0])
-      filterParticipants.push(filterParticipants[0])
-      filterParticipants.push(filterParticipants[0])
-    }
+    const listScrollerClassNames = classnames({
+      [style.CallBoxSceneGroupVideoThumbnail__ListScroller]: true,
+      [style["CallBoxSceneGroupVideoThumbnail__ListScroller--mobile"]]: isMobile
+    });
 
     return <Container className={classNames}>
       <Container className={sceneClassNames}>
@@ -281,12 +274,12 @@ export default class CallBoxSceneGroupVideoThumbnail extends Component {
       {isVideoIncluded &&
       <Container className={listClassNames}>
         <Container className={style.CallBoxSceneGroupVideoThumbnail__ListContainer}>
-          <Container className={style.CallBoxSceneGroupVideoThumbnail__ListScroller}
+          <Container className={listScrollerClassNames}
                      ref={this.scrollerRef}
-                     onMouseDown={this.onScrollerMouseDown}
-                     onMouseLeave={this.onScrollerMouseLeaveUp}
-                     onMouseUp={this.onScrollerMouseLeaveUp}
-                     onMouseMove={this.onScrollerMouseMove}>
+                     onMouseDown={!isMobile && this.onScrollerMouseDown}
+                     onMouseLeave={!isMobile && this.onScrollerMouseLeaveUp}
+                     onMouseUp={!isMobile && this.onScrollerMouseLeaveUp}
+                     onMouseMove={!isMobile && this.onScrollerMouseMove}>
             {filterParticipants.map((participant, index) =>
               <Container className={style.CallBoxSceneGroupVideoThumbnail__ListItem}
                          key={participant.id}
