@@ -664,6 +664,13 @@ export const threadMessageListReducer = (state = {
         })
       };
     }
+    case THREAD_GET_MESSAGE_LIST(CANCELED):
+      return {
+        ...state, ...stateGenerator(CANCELED, {
+          threadId: null,
+          messages: []
+        })
+      }
     case THREAD_CREATE_ON_THE_FLY:
       return {
         ...state, ...stateGenerator(SUCCESS, {

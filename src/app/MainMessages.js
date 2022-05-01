@@ -163,7 +163,7 @@ export default class MainMessages extends Component {
       user
     } = this.props;
     const {messageNew, thread, threadGoToMessageId} = nextProps;
-    const {hasNext} = threadMessages;
+    const {hasNext, fetching} = threadMessages;
 
     if (threadGoToMessageId !== oldThreadGoToMessageId) {
       if (threadGoToMessageId) {
@@ -354,6 +354,7 @@ export default class MainMessages extends Component {
     this.hasPendingMessageToGo = null;
     const {thread, dispatch} = this.props;
     const {unreadBar, newMessageUnreadCount} = this.state;
+    console
     dispatch(threadMessageGetListPartial(null, null, null, null, true));
     dispatch(threadMessageGetListByMessageId(null, null, null, true));
     if (fetchLastHistoryWithoutAnyCondition) {

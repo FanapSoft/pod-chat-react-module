@@ -110,7 +110,7 @@ export default class MainHeadCallButtons extends Component {
     return (
       <Container inline>
         {isGroup(thread) && <MakeGlobalCall noRender ref={this.makeGlobalCallRef} dualMode thread={thread}/>}
-        {isJoinCall ?
+        {isJoinCall && isGroup(thread) ?
 
           <Button className={style.MainHeadCallButtons__JoinCallButton}
                   onClick={this.onJoinCall}>{strings.joinCall}</Button>

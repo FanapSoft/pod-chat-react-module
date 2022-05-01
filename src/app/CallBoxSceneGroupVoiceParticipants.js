@@ -60,7 +60,7 @@ export default class CallBoxSceneGroup extends Component {
     }
     let filteredParticipantList = chatCallParticipantList.length > BREAK_PARTICIPANT_AVATAR_LIMIT ? chatCallParticipantList.slice(0, 4) : chatCallParticipantList;
     if (chatCallParticipantList.length > BREAK_PARTICIPANT_AVATAR_LIMIT) {
-      filteredParticipantList.push({contactName: "5 +"})
+      filteredParticipantList.push({contactName: "5+", callStatus: 6, isSymbolic: true})
     }
     filteredParticipantList = callStarted ? filteredParticipantList.filter(e => e.callStatus === 6) : filteredParticipantList;
     return <Container className={CallBoxSceneGroupParticipantsClassNames}
@@ -76,7 +76,7 @@ export default class CallBoxSceneGroup extends Component {
           }
           <Avatar cssClassNames={avatarClassName} inline={false}>
             <AvatarImage src={avatarUrlGenerator(getImage(participant), avatarUrlGenerator.SIZES.XLARGE)}
-                         text={avatarNameGenerator(getName(participant)).letter}
+                         text={participant.isSymbolic ? participant.contactName : avatarNameGenerator(getName(participant)).letter}
                          textBg={avatarNameGenerator(getName(participant)).color}/>
           </Avatar>
         </Container>

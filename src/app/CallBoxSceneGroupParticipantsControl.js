@@ -5,11 +5,9 @@ import {isOwner} from "../utils/privilege";
 //actions
 import {
   chatCallAddParticipants,
-  chatCallGetParticipantList,
   chatCallGroupSettingsShowing,
   chatCallMuteParticipants, chatCallParticipantListChange,
   chatCallRemoveParticipants,
-  chatCallUnMuteParticipants,
   chatSelectParticipantForCallShowing
 } from "../actions/chatActions";
 
@@ -25,19 +23,17 @@ import {
   MdCallEnd,
   MdAdd, MdPhone, MdAddCall
 } from "react-icons/md";
-import {Button} from "../../../pod-chat-ui-kit/src/button";
 import List from "../../../pod-chat-ui-kit/src/List";
 
 //styling
 import style from "../../styles/app/CallBoxSceneGroupParticipantsControl.scss";
 import {CHAT_CALL_STATUS_STARTED, MAX_GROUP_CALL_COUNT,} from "../constants/callModes";
-import {ContactListItem, getImage, getName} from "./_component/contactList";
+import {ContactListItem} from "./_component/contactList";
 import classnames from "classnames";
 import Gap from "raduikit/src/gap";
 import strings from "../constants/localization";
-import {THREAD_ADMIN} from "../constants/privilege";
-import Timer from "react-compound-timer";
 import {checkForParticipantsStatus} from "../utils/helpers";
+import SelectParticipantForCallFooter from "./_component/SelectParticipantForCallFooter";
 
 @connect(store => {
   return {
@@ -52,7 +48,6 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
     this.onParticipantMuteClick = this.onParticipantMuteClick.bind(this);
     this.onParticipantRemoveClicked = this.onParticipantRemoveClicked.bind(this);
     this.onAddMember = this.onAddMember.bind(this);
-    this._selectParticipantForCallFooterFragment = this._selectParticipantForCallFooterFragment.bind(this);
     this.hideControl = this.hideControl.bind(this);
     this.callAgain = this.callAgain.bind(this);
     this.state = {}
@@ -83,36 +78,6 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
     checkForParticipantsStatus.call(this, chatCallParticipantList);
   }
 
-  _selectParticipantForCallFooterFragment(mode, {selectedContacts, allContacts}) {
-    const {dispatch, chatCallBoxShowing, chatCallStatus} = this.props;
-    const {thread} = chatCallBoxShowing;
-    const isMaximumCount = thread.participantCount + selectedContacts.length > MAX_GROUP_CALL_COUNT;
-    return <Container>
-      <Container>
-        {(selectedContacts && selectedContacts.length >= 1) &&
-        <Button disabled={isMaximumCount} color={isMaximumCount ? "gray" : "accent"} onClick={e => {
-          if (isMaximumCount) {
-            return;
-          }
-          const selectedParticipants = allContacts.filter(e => selectedContacts.indexOf(e.id) > -1).map(e => ({
-            ...e,
-            id: e.userId
-          }))
-          dispatch(chatSelectParticipantForCallShowing(false));
-          dispatch(chatCallAddParticipants(chatCallStatus.call.callId, selectedContacts, selectedParticipants));
-        }}>{strings.add}</Button>
-        }
-        <Button text onClick={() => dispatch(chatSelectParticipantForCallShowing(false))}>{strings.cancel}</Button>
-      </Container>
-      <Container>
-        {
-          isMaximumCount &&
-          <Text color="accent">{strings.maximumNumberOfContactSelected}</Text>
-        }
-      </Container>
-    </Container>
-  }
-
   onAddMember() {
     const {chatCallBoxShowing, dispatch} = this.props;
     const {thread} = chatCallBoxShowing;
@@ -121,7 +86,7 @@ export default class CallBoxSceneGroupParticipantsControl extends Component {
         showing: true,
         selectiveMode: true,
         headingTitle: strings.addMember,
-        FooterFragment: this._selectParticipantForCallFooterFragment
+        FooterFragment: SelectParticipantForCallFooter
       },
     ));
   }

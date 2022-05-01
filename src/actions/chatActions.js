@@ -1,8 +1,9 @@
 // src/actions/messageActions.js
 import {
+  threadCreateWithExistThread,
   threadGetList,
   threadGoToMessageId,
-  threadLeave,
+  threadLeave, threadMessageGetList,
 } from "./threadActions";
 import ChatSDK from "../utils/chatSDK";
 import {stateGeneratorState} from "../utils/storeHelper";
@@ -130,7 +131,16 @@ export const chatSetInstance = config => {
       onThreadEvents: (thread, type) => {
 
         switch (type) {
-          case THREAD_NEW:
+          case THREAD_NEW: {
+            if (thread.redirectToThread) {
+              dispatch(threadMessageGetList(null, null, true));
+            }
+            return dispatch({
+              type: type,
+              payload: {redirectToThread: thread.redirectToThread, thread: thread.result.thread}
+
+            });
+          }
           case THREAD_PARTICIPANTS_LIST_CHANGE:
           case THREAD_LEAVE_PARTICIPANT:
           case THREADS_LIST_CHANGE:
@@ -143,14 +153,12 @@ export const chatSetInstance = config => {
             return dispatch({
               type: type,
               payload:
-                type === THREAD_NEW ? {redirectToThread: thread.redirectToThread, thread: thread.result.thread}
+                type === THREADS_LIST_CHANGE ? thread.result.threads
                   :
-                  type === THREADS_LIST_CHANGE ? thread.result.threads
+                  type === THREAD_PARTICIPANTS_LIST_CHANGE ? {...thread.result, threadId: thread.threadId}
                     :
-                    type === THREAD_PARTICIPANTS_LIST_CHANGE ? {...thread.result, threadId: thread.threadId}
-                      :
-                      type === THREAD_LEAVE_PARTICIPANT ? {threadId: thread.threadId, id: thread.result.participant.id}
-                        : thread
+                    type === THREAD_LEAVE_PARTICIPANT ? {threadId: thread.threadId, id: thread.result.participant.id}
+                      : thread
             });
           case "MESSAGE_UNPIN":
           case "MESSAGE_PIN": {
