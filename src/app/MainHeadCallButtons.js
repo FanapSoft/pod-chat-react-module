@@ -107,6 +107,7 @@ export default class MainHeadCallButtons extends Component {
 
     });
     const isJoinCall = thread.call;
+    console.log(isJoinCall && isGroup(thread))
     return (
       <Container inline>
         {isGroup(thread) && <MakeGlobalCall noRender ref={this.makeGlobalCallRef} dualMode thread={thread}/>}

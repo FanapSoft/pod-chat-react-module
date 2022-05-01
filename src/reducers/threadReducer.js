@@ -685,6 +685,7 @@ export const threadMessageListReducer = (state = {
     case THREAD_GET_MESSAGE_LIST_BY_MESSAGE_ID(SUCCESS):
     case THREAD_GET_MESSAGE_LIST(SUCCESS): {
       const {threadId, messages} = action.payload;
+      console.log(state, threadId)
       if (state.threadId) {
         if (threadId !== state.threadId) {
           return state;

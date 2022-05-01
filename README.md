@@ -82,15 +82,16 @@ class MyApp extends Component {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="dist/index.js"/>
+    <script src="dist/index-old-school.js"/>
 </head>
 
 <body>
 <div id="app"></div>
 <script>
-    var podchat = Podchat({token: "YOUR_TOKEN"}, "app");
-    //GOT NEW TOKEN
-    podchat.setToken("YOUR_NEW_TOKEN");
+    Podchat({token: "YOUR_INITIAL_TOKEN", ...ANOTHER_OPTIONS }, "app" /*div ID*/, function (instance) {
+        //SET TOKEN WHEN YOU GOT FRESH TOKEN
+        instance.setToken("REFRESH_TOKEN")
+    });
 </script>
 </body>
 </html>
@@ -107,10 +108,32 @@ import {PodchatJSX} from "podchatweb";
 class MyApp extends Component {
   render() {
     const {token} = this.props;
-    return <PodchatJSX supportMode={8543}
+    return <PodchatJSX supportMode={1234} //SUPPORT THREAD ID
                        token={token}/>
   }
 }
+```
+Or in old school mode:
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="dist/index-old-school.js"/>
+  </head>
+
+<body>
+  <div id="app"></div>
+  <script>
+    Podchat({token: "YOUR_INITIAL_TOKEN", supportMode: 1234 /*SUPPORT THREAD ID*/}, "app" /*div ID*/, function (instance) {
+    //SET TOKEN WHEN YOU GOT FRESH TOKEN
+    instance.setToken("REFRESH_TOKEN")
+  });
+  </script>
+</body>
+</html>
 ```
 
 ## Props
